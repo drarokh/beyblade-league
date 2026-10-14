@@ -1,0 +1,1999 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beyblade X - 8-Player Draft & Builder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background-color: #0b0d17;
+            color: #f3f4f6;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(0, 240, 255, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(255, 0, 127, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(100, 0, 255, 0.05) 0%, transparent 60%);
+        }
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+        .neon-glow-cyan {
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+        }
+        .neon-glow-pink {
+            box-shadow: 0 0 15px rgba(255, 0, 127, 0.4);
+        }
+        .neon-glow-gold {
+            box-shadow: 0 0 15px rgba(255, 204, 0, 0.4);
+        }
+        .neon-text-cyan {
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.7);
+        }
+        .neon-text-pink {
+            text-shadow: 0 0 10px rgba(255, 0, 127, 0.7);
+        }
+        .reel-spinning {
+            animation: spinBlur 0.15s infinite linear;
+        }
+        @keyframes spinBlur {
+            0% { transform: translateY(-5px); filter: blur(2px); }
+            50% { transform: translateY(5px); filter: blur(4px); }
+            100% { transform: translateY(-5px); filter: blur(2px); }
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111428;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #252b48;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00f0ff;
+        }
+
+        /* Nasconde le freccette dei campi numerici */
+        #league-rounds input[type="number"]::-webkit-inner-spin-button,
+        #league-rounds input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        #league-rounds input[type="number"] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-3 sm:p-6">
+
+    <!-- HEADER -->
+    <header class="max-w-7xl w-full mx-auto mb-6 flex flex-col md:flex-row justify-between items-center bg-gray-900/80 backdrop-blur-md border border-cyan-500/30 p-4 rounded-2xl shadow-2xl gap-4">
+        <div class="flex items-center space-x-3">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-fuchsia-600 p-0.5 flex items-center justify-center neon-glow-cyan">
+                <div class="w-full h-full bg-gray-950 rounded-[10px] flex items-center justify-center">
+                    <svg class="w-7 h-7 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                </div>
+            </div>
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-black font-orbitron tracking-wider bg-gradient-to-r from-cyan-400 via-fuchsia-400 to-amber-300 bg-clip-text text-transparent">
+                    BEYBLADE X DRAFT
+                </h1>
+                <p class="text-xs text-gray-400">8 Giocatori • 3 Beyblade a testa</p>
+            </div>
+        </div>
+
+        <!-- GLOBAL STATS / RESET -->
+        <div class="flex items-center gap-3">
+            <div class="bg-gray-950/80 px-4 py-2 rounded-xl border border-gray-800 text-center">
+                <span class="text-xs text-gray-400 block font-semibold uppercase">Bey Totali Completi</span>
+                <span id="global-bey-count" class="text-lg font-bold font-orbitron text-cyan-400">0 / 24</span>
+            </div>
+            <button id="export-json-btn"
+                class="bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 4v12m0 0l-4-4m4 4l4-4M5 20h14"/>
+                </svg>
+                Esporta
+            </button>
+            <button id="import-json-btn"
+                class="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 16V4m0 0L8 8m4-4l4 4M5 20h14"/>
+                </svg>
+                Importa
+            </button>
+            <input
+                type="file"
+                id="import-json-file"
+                accept=".json,application/json"
+                class="hidden">
+            <button id="reset-draft-btn" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/40 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.033 8.033 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+                Reset Draft
+            </button>
+        </div>
+    </header>
+
+    <!-- PLAYER SELECTION BAR -->
+    <main class="max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+        
+        <!-- LEFT: SLOT MACHINE & BUILDER (7 Cols) -->
+        <section class="lg:col-span-7 flex flex-col gap-6">
+            
+            <!-- ACTIVE PLAYER CARD -->
+            <div class="bg-gray-900/90 border border-cyan-500/30 rounded-2xl p-4 sm:p-5 shadow-xl relative overflow-hidden backdrop-blur-md">
+                <div class="absolute -right-8 -top-8 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none"></div>
+                
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-3">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-cyan-400 font-orbitron">Giocatore Attivo</span>
+                        <div class="flex items-center gap-3 mt-1">
+                            <select id="player-select" class="bg-gray-950 border-2 border-cyan-500/50 text-white font-orbitron text-lg font-bold rounded-xl px-4 py-2 focus:outline-none focus:border-cyan-400 cursor-pointer">
+                                <!-- Options dynamically inserted -->
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-2 bg-gray-950/80 p-2 rounded-xl border border-gray-800">
+                        <div id="player-progress-dots" class="flex gap-2">
+                            <!-- Slots indicators -->
+                        </div>
+                        <span id="player-slot-status" class="text-xs font-bold font-orbitron text-gray-300 ml-2">Bey 1/3</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLOT MACHINE BOARD -->
+            <div class="bg-gray-900/90 border border-gray-800 rounded-2xl p-4 sm:p-6 shadow-2xl relative">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="font-orbitron font-bold text-lg text-white flex items-center gap-2">
+                        <svg class="w-5 h-5 text-fuchsia-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Draft Slot Machine
+                    </h2>
+                    <div class="flex gap-2">
+                        <button id="lock-all-btn" class="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-lg border border-gray-700 transition">Blocca Tutti</button>
+                        <button id="unlock-all-btn" class="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-lg border border-gray-700 transition">Sblocca Tutti</button>
+                    </div>
+                </div>
+
+                <!-- 3 REELS GRID -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                    
+                    <!-- REEL 1: BLADE -->
+                    <div class="bg-gray-950 rounded-xl p-3 border-2 border-cyan-500/30 flex flex-col items-center relative overflow-hidden transition-all duration-300" id="reel-card-blade">
+                        <div class="w-full flex justify-between items-center mb-2">
+                            <span class="text-xs font-bold text-cyan-400 font-orbitron uppercase">Lama (Blade)</span>
+                            <span id="count-blade" class="text-[10px] bg-cyan-950 text-cyan-300 border border-cyan-800 px-1.5 py-0.5 rounded-md font-bold">12 Rimanenti</span>
+                        </div>
+                        
+                        <div id="reel-display-blade" class="w-full h-36 bg-gray-900/60 rounded-lg flex flex-col items-center justify-center p-2 text-center border border-gray-800/80 mb-3 relative">
+                            <!-- Embedded SVG Icon -->
+                            <div id="blade-svg-container" class="w-16 h-16 mb-2"></div>
+                            <span id="blade-title" class="font-bold text-sm text-white line-clamp-1">---</span>
+                            <span id="blade-weight" class="text-xs text-cyan-300/80 mt-0.5 font-semibold">0.0g</span>
+                        </div>
+
+                        <button id="hold-blade-btn" onclick="toggleHold('blade')" class="w-full py-2 bg-gray-800 hover:bg-cyan-600/30 text-cyan-400 border border-cyan-500/40 rounded-lg text-xs font-bold font-orbitron tracking-wider transition flex items-center justify-center gap-1.5">
+                            <span id="hold-icon-blade">🔓</span> HOLD
+                        </button>
+                    </div>
+
+                    <!-- REEL 2: RATCHET -->
+                    <div class="bg-gray-950 rounded-xl p-3 border-2 border-fuchsia-500/30 flex flex-col items-center relative overflow-hidden transition-all duration-300" id="reel-card-ratchet">
+                        <div class="w-full flex justify-between items-center mb-2">
+                            <span class="text-xs font-bold text-fuchsia-400 font-orbitron uppercase">Ratchet</span>
+                            <span id="count-ratchet" class="text-[10px] bg-fuchsia-950 text-fuchsia-300 border border-fuchsia-800 px-1.5 py-0.5 rounded-md font-bold">12 Rimanenti</span>
+                        </div>
+                        
+                        <div id="reel-display-ratchet" class="w-full h-36 bg-gray-900/60 rounded-lg flex flex-col items-center justify-center p-2 text-center border border-gray-800/80 mb-3 relative">
+                            <!-- Embedded SVG Icon -->
+                            <div id="ratchet-svg-container" class="w-16 h-16 mb-2"></div>
+                            <span id="ratchet-title" class="font-bold text-sm text-white line-clamp-1">---</span>
+                            <span id="ratchet-weight" class="text-xs text-fuchsia-300/80 mt-0.5 font-semibold">0.0g</span>
+                        </div>
+
+                        <button id="hold-ratchet-btn" onclick="toggleHold('ratchet')" class="w-full py-2 bg-gray-800 hover:bg-fuchsia-600/30 text-fuchsia-400 border border-fuchsia-500/40 rounded-lg text-xs font-bold font-orbitron tracking-wider transition flex items-center justify-center gap-1.5">
+                            <span id="hold-icon-ratchet">🔓</span> HOLD
+                        </button>
+                    </div>
+
+                    <!-- REEL 3: BIT -->
+                    <div class="bg-gray-950 rounded-xl p-3 border-2 border-amber-500/30 flex flex-col items-center relative overflow-hidden transition-all duration-300" id="reel-card-bit">
+                        <div class="w-full flex justify-between items-center mb-2">
+                            <span class="text-xs font-bold text-amber-400 font-orbitron uppercase">Punta (Bit)</span>
+                            <span id="count-bit" class="text-[10px] bg-amber-950 text-amber-300 border border-amber-800 px-1.5 py-0.5 rounded-md font-bold">12 Rimanenti</span>
+                        </div>
+                        
+                        <div id="reel-display-bit" class="w-full h-36 bg-gray-900/60 rounded-lg flex flex-col items-center justify-center p-2 text-center border border-gray-800/80 mb-3 relative">
+                            <!-- Embedded SVG Icon -->
+                            <div id="bit-svg-container" class="w-16 h-16 mb-2"></div>
+                            <span id="bit-title" class="font-bold text-sm text-white line-clamp-1">---</span>
+                            <span id="bit-weight" class="text-xs text-amber-300/80 mt-0.5 font-semibold">0.0g</span>
+                        </div>
+
+                        <button id="hold-bit-btn" onclick="toggleHold('bit')" class="w-full py-2 bg-gray-800 hover:bg-amber-600/30 text-amber-400 border border-amber-500/40 rounded-lg text-xs font-bold font-orbitron tracking-wider transition flex items-center justify-center gap-1.5">
+                            <span id="hold-icon-bit">🔓</span> HOLD
+                        </button>
+                    </div>
+
+                </div>
+
+                <!-- SPIN & BUILD CONTROLS -->
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button id="spin-btn" class="flex-1 py-4 bg-gradient-to-r from-cyan-500 via-fuchsia-500 to-amber-500 hover:opacity-90 active:scale-98 text-gray-950 font-black font-orbitron text-lg rounded-xl shadow-lg transition-all transform flex items-center justify-center gap-2 uppercase tracking-widest cursor-pointer">
+                        <svg class="w-6 h-6 animate-spin-slow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.033 8.033 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        ROLL!
+                    </button>
+                    
+                    <button id="build-btn" class="py-4 px-6 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-black font-orbitron text-md rounded-xl shadow-lg hover:shadow-emerald-500/30 transition-all flex items-center justify-center gap-2 uppercase tracking-wider cursor-pointer">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Assegna Bey
+                    </button>
+                </div>
+            </div>
+
+            <!-- CURRENT COMBO STATS PREVIEW -->
+            <div class="bg-gray-900/90 border border-gray-800 rounded-2xl p-4 sm:p-5 shadow-xl">
+                <h3 class="font-orbitron font-bold text-sm text-gray-300 mb-3 flex items-center justify-between">
+                    <span>Statistiche Combo Attuale</span>
+                    <span id="total-weight-badge" class="text-xs bg-gray-800 text-cyan-400 px-2.5 py-1 rounded-lg border border-cyan-500/30 font-bold">Peso Totale: 0.0g</span>
+                </h3>
+
+                <div class="space-y-3">
+                    <!-- ATK -->
+                    <div>
+                        <div class="flex justify-between text-xs font-bold mb-1">
+                            <span class="text-red-400 flex items-center gap-1">⚔️ Attacco (ATK)</span>
+                            <span id="stat-val-atk" class="text-white">0</span>
+                        </div>
+                        <div class="w-full h-2.5 bg-gray-950 rounded-full overflow-hidden p-0.5 border border-gray-800">
+                            <div id="stat-bar-atk" class="h-full bg-gradient-to-r from-red-600 to-red-400 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- DEF -->
+                    <div>
+                        <div class="flex justify-between text-xs font-bold mb-1">
+                            <span class="text-blue-400 flex items-center gap-1">🛡️ Difesa (DEF)</span>
+                            <span id="stat-val-def" class="text-white">0</span>
+                        </div>
+                        <div class="w-full h-2.5 bg-gray-950 rounded-full overflow-hidden p-0.5 border border-gray-800">
+                            <div id="stat-bar-def" class="h-full bg-gradient-to-r from-blue-600 to-blue-400 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- STA -->
+                    <div>
+                        <div class="flex justify-between text-xs font-bold mb-1">
+                            <span class="text-emerald-400 flex items-center gap-1">🌀 Stamina (STA)</span>
+                            <span id="stat-val-sta" class="text-white">0</span>
+                        </div>
+                        <div class="w-full h-2.5 bg-gray-950 rounded-full overflow-hidden p-0.5 border border-gray-800">
+                            <div id="stat-bar-sta" class="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- RIGHT: PLAYERS OVERVIEW & ASSIGNED BEYS (5 Cols) -->
+        <section class="lg:col-span-5 flex flex-col gap-4">
+            <div class="bg-gray-900/90 border border-gray-800 rounded-2xl p-4 sm:p-5 shadow-xl h-full flex flex-col">
+                <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-800">
+                    <h2 class="font-orbitron font-bold text-lg text-white flex items-center gap-2">
+                        <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                        I Beyblade dei Giocatori
+                    </h2>
+                    <span id="roster-filter-indicator" class="text-xs text-gray-400">8 Giocatori attivi</span>
+                </div>
+
+                <!-- PLAYERS LIST CONTAINER -->
+                <div id="players-roster-container" class="space-y-6 overflow-y-auto max-h-[650px] pr-1">
+                    <!-- Dynamic rendering of 8 players and their combos -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <!-- CAMPIONATO ROUND ROBIN -->
+    <section class="max-w-7xl w-full mx-auto mb-8">
+        <div class="bg-gray-900/90 border border-fuchsia-500/30 rounded-2xl p-4 sm:p-6 shadow-2xl">
+
+            <div class="flex flex-col sm:flex-row justify-between gap-4 mb-5">
+                <div>
+                    <h2 class="font-orbitron font-bold text-xl text-fuchsia-400">
+                        🏆 CAMPIONATO BEYBLADE X
+                    </h2>
+                    <p class="text-sm text-gray-400 mt-1">
+                        Round Robin • 8 giocatori • 7 giornate • 28 incontri
+                    </p>
+                </div>
+
+                <div class="flex flex-wrap gap-2 my-2">
+                    <button id="generate-league-btn"
+                        class="bg-fuchsia-500/10 hover:bg-fuchsia-500/20 text-fuchsia-400 border border-fuchsia-500/40 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M20 7v5h-5M4 17v-5h5M5.64 7.64A7 7 0 0 1 17.5 6L20 12M4 12l2.5 6A7 7 0 0 0 18.36 16.36"/>
+                        </svg>
+                        Genera calendario
+                    </button>
+
+                    <button id="export-league-json-btn"
+                        class="bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 4v12m0 0l-4-4m4 4l4-4M5 20h14"/>
+                        </svg>
+                        Esporta
+                    </button>
+
+                    <button id="import-league-json-btn"
+                        class="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 16V4m0 0L8 8m4-4l4 4M5 20h14"/>
+                        </svg>
+                        Importa
+                    </button>
+
+                    <input id="import-league-json-file" type="file"
+                        accept=".json,application/json" class="hidden">
+                </div>
+            </div>
+
+            <div id="league-status"
+                class="bg-gray-950 border border-gray-800 rounded-xl p-3 mb-5 text-sm text-gray-300">
+                Completa il draft di tutti gli 8 giocatori per generare il calendario.
+            </div>
+
+            <!-- CLASSIFICA -->
+            <div class="mb-6">
+                <h3 class="font-orbitron font-bold text-sm text-cyan-400 mb-3">
+                    CLASSIFICA
+                </h3>
+
+                <div class="overflow-x-auto rounded-xl border border-gray-800">
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-gray-950 text-gray-400 text-xs uppercase">
+                            <tr>
+                                <th class="p-3">#</th>
+                                <th class="p-3">Giocatore</th>
+                                <th class="p-3">PG</th>
+                                <th class="p-3">V</th>
+                                <th class="p-3">S</th>
+                                <th class="p-3">PF</th>
+                                <th class="p-3">PS</th>
+                                <th class="p-3">Diff.</th>
+                                <th class="p-3 text-cyan-400">Pt</th>
+                            </tr>
+                        </thead>
+                        <tbody id="league-standings-body" class="divide-y divide-gray-800">
+                            <tr>
+                                <td colspan="9" class="p-4 text-center text-gray-500">
+                                    Nessuna classifica disponibile.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">
+                    PG: partite giocate • V: vittorie • S: sconfitte •
+                    PF: punti fatti • PS: punti subiti • Pt: punti in classifica
+                </p>
+            </div>
+
+            <!-- GIORNATE -->
+            <div>
+                <h3 class="font-orbitron font-bold text-sm text-amber-400 mb-3">
+                    CALENDARIO E RISULTATI
+                </h3>
+
+                <div id="league-rounds" class="space-y-4">
+                    <p class="text-sm text-gray-500">
+                        Il calendario apparirà qui dopo la generazione.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="max-w-7xl w-full mx-auto text-center text-xs text-gray-500 py-4 border-t border-gray-800/80 mt-auto">
+        Beyblade X Draft • Formato 8 Giocatori
+    </footer>
+
+    <script>
+        // --- DATA POOL ---
+        // Blades, Ratchets, Bits datasets with balanced stats & clean SVGs
+
+const ORIGINAL_BLADES = [
+{ id: 'b1', name: 'Phoenix Wing', weight: 38.2, atk: 65, def: 30, sta: 20, spin: 'R', type: 'ATK', rank: 'S', image: 'images/blades/PhoenixWing.png' },
+{ id: 'b2', name: 'Cobalt Dragoon', weight: 37.8, atk: 60, def: 15, sta: 25, spin: 'L', type: 'ATK', rank: 'S', image: 'images/blades/CobaltDragoon.png' },
+{ id: 'b3', name: 'Impact Drake', weight: 38.8, atk: 75, def: 25, sta: 10, spin: 'R', type: 'ATK', rank: 'A', image: 'images/blades/ImpactDrake.png' },
+{ id: 'b4', name: 'Keel Shark', weight: 34.5, atk: 60, def: 25, sta: 15, spin: 'R', type: 'ATK', rank: 'A', image: 'images/blades/KeelShark.png' },
+{ id: 'b5', name: 'Buster Dran', weight: 36.5, atk: 70, def: 20, sta: 10, spin: 'R', type: 'ATK', rank: 'A', image: 'images/blades/BusterDran.png' },
+{ id: 'b6', name: 'Tyranno Beat', weight: 37.0, atk: 65, def: 30, sta: 5, spin: 'R', type: 'ATK', rank: 'A', image: 'images/blades/TyrannoBeat.png' },
+{ id: 'b7', name: 'Fox Brush', weight: 36.7, atk: 60, def: 30, sta: 10, spin: 'R', type: 'ATK', rank: 'B', image: 'images/blades/FoxBrush.png' },
+{ id: 'b8', name: 'Sword Dran', weight: 35.1, atk: 55, def: 25, sta: 20, spin: 'R', type: 'ATK', rank: 'B', image: 'images/blades/SwordDran.png' },
+{ id: 'b9', name: 'Saber Samurai', weight: 36.3, atk: 65, def: 20, sta: 25, spin: 'R', type: 'ATK', rank: 'B', image: 'images/blades/SaberSamurai.png' },
+{ id: 'b10', name: 'Dagger Dran', weight: 34.9, atk: 50, def: 25, sta: 25, spin: 'R', type: 'ATK', rank: 'B', image: 'images/blades/DaggerDran.png' },
+{ id: 'b11', name: 'Sol Eclipse', weight: 39.9, atk: 47, def: 33, sta: 20, spin: 'R', type: 'BAL', rank: 'S', image: 'images/blades/SolEclipse.png' },
+{ id: 'b12', name: 'Samurai Calibur', weight: 36.0, atk: 40, def: 30, sta: 30, spin: 'R', type: 'BAL', rank: 'A', image: 'images/blades/SamuraiCalibur.png' },
+{ id: 'b13', name: 'Sting Unicorn', weight: 33.0, atk: 35, def: 35, sta: 30, spin: 'R', type: 'BAL', rank: 'A', image: 'images/blades/StingUnicorn.png' },
+{ id: 'b14', name: 'Hammer Incendio', weight: 33.3, atk: 50, def: 25, sta: 25, spin: 'R', type: 'BAL', rank: 'B', image: 'images/blades/HammerIncendio.png' },
+{ id: 'b15', name: 'Reaper Incendio', weight: 36.3, atk: 40, def: 20, sta: 40, spin: 'R', type: 'BAL', rank: 'A', image: 'images/blades/ReaperIncendio.png' },
+{ id: 'b16', name: 'Tusk Mammuth', weight: 32.9, atk: 38, def: 40, sta: 37, spin: 'R', type: 'BAL', rank: 'C', image: 'images/blades/TuskMammuth.png' },
+{ id: 'b17', name: 'Wand Wizard', weight: 35.5, atk: 15, def: 25, sta: 60, spin: 'R', type: 'STA', rank: 'S', image: 'images/blades/WandWizard.png' },
+{ id: 'b18', name: 'Sterling Wolf', weight: 36.6, atk: 15, def: 30, sta: 65, spin: 'R', type: 'STA', rank: 'S', image: 'images/blades/SterlingWolf.png' },
+{ id: 'b19', name: 'Tail Viper', weight: 34.3, atk: 30, def: 20, sta: 50, spin: 'R', type: 'STA', rank: 'C', image: 'images/blades/TailViper.png' },
+{ id: 'b20', name: 'Ptera Swing', weight: 34.5, atk: 27, def: 23, sta: 50, spin: 'R', type: 'STA', rank: 'B', image: 'images/blades/PteraSwing.png' },
+{ id: 'b21', name: 'Rage Ragna', weight: 38, atk: 25, def: 20, sta: 55, spin: 'R', type: 'STA', rank: 'X', image: 'images/blades/RageRagna.png' },
+{ id: 'b22', name: 'Knight Mail', weight: 36.6, atk: 10, def: 65, sta: 35, spin: 'R', type: 'DEF', rank: 'S', image: 'images/blades/KnightMail.png' },
+{ id: 'b23', name: 'Rock Golem', weight: 34.0, atk: 30, def: 60, sta: 10, spin: 'R', type: 'DEF', rank: 'A', image: 'images/blades/RockGolem.png' },
+{ id: 'b24', name: 'Crest Leon', weight: 34.8, atk: 15, def: 70, sta: 15, spin: 'R', type: 'DEF', rank: 'B', image: 'images/blades/CrestLeon.png' },
+{ id: 'b25', name: 'Tricera Press', weight: 36.5, atk: 20, def: 65, sta: 15, spin: 'R', type: 'DEF', rank: 'B', image: 'images/blades/TriceraPress.png' },
+{ id: 'b26', name: 'Cowl Sphinx', weight: 32.6, atk: 35, def: 55, sta: 10, spin: 'R', type: 'DEF', rank: 'C', image: 'images/blades/CowlSphinx.png' },
+{ id: 'b27', name: 'Curse Mummy', weight: 37.5, atk: 30, def: 60, sta: 20, spin: 'R', type: 'DEF', rank: 'X', image: 'images/blades/CurseMummy.png' }
+];
+
+const ORIGINAL_RATCHETS = [
+{ id: 'r1', name: '4-55', weight: 4.8, atk: 7, def: 11, sta: 12, rank: 'X' },
+{ id: 'r2', name: '7-55', weight: 5.3, atk: 6, def: 14, sta: 10, rank: 'X' },
+{ id: 'r3', name: '1-60', weight: 6.0, atk: 17, def: 9, sta: 4, rank: 'S', image: 'images/ratchets/1-60.png' },
+{ id: 'r4', name: '1-60', weight: 6.0, atk: 17, def: 9, sta: 4, rank: 'S', image: 'images/ratchets/1-60.png' },
+{ id: 'r5', name: '1-60', weight: 6.0, atk: 17, def: 9, sta: 4, rank: 'S', image: 'images/ratchets/1-60.png' },
+{ id: 'r6', name: '2-60', weight: 6.2, atk: 10, def: 13, sta: 7, rank: 'C', image: 'images/ratchets/2-60.png' },	  
+{ id: 'r7', name: '2-70', weight: 6.3, atk: 10, def: 12, sta: 8, rank: 'X', image: 'images/ratchets/2-70.png' },		
+{ id: 'r8', name: '3-60', weight: 6.4, atk: 15, def: 9, sta: 6, rank: 'A', image: 'images/ratchets/3-60.png' },	  
+{ id: 'r9', name: '3-60', weight: 6.4, atk: 15, def: 9, sta: 6, rank: 'A', image: 'images/ratchets/3-60.png' },	
+{ id: 'r10', name: '3-60', weight: 6.4, atk: 15, def: 9, sta: 6, rank: 'A', image: 'images/ratchets/3-60.png' },	
+{ id: 'r11', name: '4-60', weight: 6.3, atk: 11, def: 13, sta: 6, rank: 'B', image: 'images/ratchets/4-60.png' },  
+{ id: 'r12', name: '5-60', weight: 6.6, atk: 12, def: 9, sta: 9, rank: 'S', image: 'images/ratchets/5-60.png' },
+{ id: 'r13', name: '7-60', weight: 7.1, atk: 8, def: 14, sta: 8, rank: 'A', image: 'images/ratchets/7-60.png' },
+{ id: 'r14', name: '9-60', weight: 6.2, atk: 13, def: 10, sta: 7, rank: 'S', image: 'images/ratchets/9-60.png' }, 
+{ id: 'r15', name: '9-60', weight: 6.2, atk: 13, def: 10, sta: 7, rank: 'S', image: 'images/ratchets/9-60.png' }, 
+{ id: 'r16', name: '3-70', weight: 6.4, atk: 15, def: 8, sta: 7, rank: 'B', image: 'images/ratchets/3-70.png' },
+{ id: 'r17', name: '4-70', weight: 6.4, atk: 11, def: 12, sta: 7, rank: 'B', image: 'images/ratchets/4-70.png' },
+{ id: 'r18', name: '5-70', weight: 6.7, atk: 12, def: 8.5, sta: 9.5, rank: 'A', image: 'images/ratchets/5-70.png' },
+{ id: 'r19', name: '5-70', weight: 6.7, atk: 12, def: 8.5, sta: 9.5, rank: 'A', image: 'images/ratchets/5-70.png' },
+{ id: 'r20', name: '6-70', weight: 6.3, atk: 14, def: 7, sta: 9, rank: 'A', image: 'images/ratchets/6-70.png' },
+{ id: 'r21', name: '7-70', weight: 7.3, atk: 8, def: 12, sta: 10, rank: 'A', image: 'images/ratchets/7-70.png' },
+{ id: 'r22', name: '9-70', weight: 6.3, atk: 13, def: 10, sta: 7, rank: 'S', image: 'images/ratchets/9-70.png' },
+{ id: 'r23', name: '1-80', weight: 6.7, atk: 17, def: 4, sta: 9, rank: 'A', image: 'images/ratchets/1-80.png' },
+{ id: 'r24', name: '3-80', weight: 7.1, atk: 15, def: 7, sta: 8, rank: 'B', image: 'images/ratchets/3-80.png' },
+{ id: 'r25', name: '5-80', weight: 7.3, atk: 12, def: 8, sta: 10, rank: 'B', image: 'images/ratchets/5-80.png' },
+{ id: 'r26', name: 'M5-85', weight: 10.6, atk: 8, def: 19, sta: 13, rank: 'B', image: 'images/ratchets/M5-85.png' }
+];
+
+const ORIGINAL_BITS = [
+{ id: 'pt1', name: 'L Level', weight: 2.6, atk: 40, def: 5, sta: 15, type: 'ATK', rank: 'S', image: 'images/bits/LLevel.png' },
+{ id: 'pt2', name: 'F Flat', weight: 2.2, atk: 40, def: 15, sta: 10, type: 'ATK', rank: 'A', image: 'images/bits/FFlat.png' },
+{ id: 'pt3', name: 'LF Low Flat', weight: 2.1, atk: 45, def: 5, sta: 10, type: 'ATK', rank: 'A', image: 'images/bits/LFLowFlat.png' },
+{ id: 'pt4', name: 'GF Gear Flat', weight: 2.3, atk: 50, def: 5, sta: 5, type: 'ATK', rank: 'B', image: 'images/bits/GFGearFlat.png' },
+{ id: 'pt5', name: 'C Cyclone', weight: 2.2, atk: 40, def: 5, sta: 10, type: 'ATK', rank: 'B', image: 'images/bits/CCyclone.png' },
+{ id: 'pt6', name: 'R Rush', weight: 2.1, atk: 40, def: 10, sta: 20, type: 'ATK', rank: 'S', image: 'images/bits/RRush.png' },
+{ id: 'pt7', name: 'R Rush', weight: 2.1, atk: 40, def: 10, sta: 20, type: 'ATK', rank: 'S', image: 'images/bits/RRush.png' },
+{ id: 'pt8', name: 'LR Low Rush', weight: 1.9, atk: 45, def: 5, sta: 15, type: 'ATK', rank: 'S', image: 'images/bits/LRLowRush.png' },
+{ id: 'pt9', name: 'GR Gear Rush', weight: 2.1, atk: 45, def: 10, sta: 10, type: 'ATK', rank: 'B', image: 'images/bits/GRGearRush.png' },
+{ id: 'pt10', name: 'A Accel', weight: 2.6, atk: 40, def: 10, sta: 10, type: 'ATK', rank: 'A', image: 'images/bits/AAccel.png' },
+{ id: 'pt11', name: 'RA Rubber Accel', weight: 3.1, atk: 60, def: 17, sta: 3, type: 'ATK', rank: 'B', image: 'images/bits/RARubberAccel.png' },
+{ id: 'pt12', name: 'K Kick', weight: 2.2, atk: 35, def: 25, sta: 15, type: 'BAL', rank: 'A', image: 'images/bits/KKick.png' },
+{ id: 'pt13', name: 'TK Trans Kick', weight: 2.3, atk: 35, def: 30, sta: 20, type: 'BAL', rank: 'B', image: 'images/bits/TKTransKick.png' },
+{ id: 'pt14', name: 'P Point', weight: 2.2, atk: 25, def: 25, sta: 25, type: 'BAL', rank: 'S', image: 'images/bits/PPoint.png' },
+{ id: 'pt15', name: 'GP Gear Point', weight: 2.3, atk: 30, def: 25, sta: 15, type: 'BAL', rank: 'B', image: 'images/bits/GPGearPoint.png' },
+{ id: 'pt16', name: 'H Hexa', weight: 2.6, atk: 30, def: 35, sta: 20, type: 'BAL', rank: 'S', image: 'images/bits/HHexa.png' },
+{ id: 'pt17', name: 'T Taper', weight: 2.2, atk: 35, def: 20, sta: 20, type: 'BAL', rank: 'A', image: 'images/bits/TTaper.png' },
+{ id: 'pt18', name: 'B Ball', weight: 2.1, atk: 15, def: 25, sta: 50, type: 'STA', rank: 'S', image: 'images/bits/BBall.png' },
+{ id: 'pt19', name: 'FB Free Ball', weight: 1.9, atk: 10, def: 25, sta: 60, type: 'STA', rank: 'S', image: 'images/bits/FBFreeBall.png' },
+{ id: 'pt20', name: 'DB Disc Ball', weight: 3.2, atk: 15, def: 20, sta: 55, type: 'STA', rank: 'B', image: 'images/bits/DBDiscBall.png' },
+{ id: 'pt21', name: 'O Orb', weight: 2.0, atk: 10, def: 30, sta: 50, type: 'STA', rank: 'A', image: 'images/bits/OOrb.png' },
+{ id: 'pt22', name: 'Y Yelding', weight: 4.2, atk: 10, def: 15, sta: 65, type: 'STA', rank: 'X' },  
+{ id: 'pt23', name: 'UN Under Needle', weight: 1.9, atk: 10, def: 60, sta: 20, type: 'DEF', rank: 'A', image: 'images/bits/UNUnderNeedle.png' },
+{ id: 'pt24', name: 'BS Bound Spike', weight: 2.0, atk: 5, def: 60, sta: 30, type: 'DEF', rank: 'B', image: 'images/bits/BSBoundSpike.png' },
+{ id: 'pt25', name: 'GN Gear Needle', weight: 2.0, atk: 20, def: 40, sta: 10, type: 'DEF', rank: 'C', image: 'images/bits/GNGearNeedle.png' },
+{ id: 'pt26', name: 'W Wedge', weight: 1.9, atk: 5, def: 55, sta: 30, type: 'DEF', rank: 'X' }
+];
+
+        // --- PLAYERS DATA ---
+        const PLAYER_NAMES = ["Bacco", "Andrea", "Davide", "Dega", "Leo", "Maina", "Neno", "Steva"];
+        
+        // State variables
+        let availableBlades = [];
+        let availableRatchets = [];
+        let availableBits = [];
+
+        let playersState = {};
+        let activePlayer = "Bacco";
+
+        let currentSelection = {
+            blade: null,
+            ratchet: null,
+            bit: null
+        };
+
+        let holds = {
+            blade: false,
+            ratchet: false,
+            bit: false
+        };
+
+        let isSpinning = false;
+
+        const LEAGUE_STORAGE_KEY = 'beybladeXDraftLeague_v1';
+
+        let tournamentState = null;
+
+        // Salva draft, pool, selezioni e campionato.
+        function saveDraftState() {
+            try {
+                const state = {
+                    version: 1,
+                    activePlayer,
+                    playersState,
+                    availableBlades,
+                    availableRatchets,
+                    availableBits,
+                    currentSelection,
+                    holds,
+                    tournamentState
+                };
+
+                localStorage.setItem(
+                    LEAGUE_STORAGE_KEY,
+                    JSON.stringify(state)
+                );
+            } catch (error) {
+                console.error('Errore nel salvataggio:', error);
+            }
+        }
+
+        // Ripristina lo stato precedente, se disponibile.
+        function loadApp() {
+            try {
+                const saved = localStorage.getItem(LEAGUE_STORAGE_KEY);
+
+                if (saved) {
+                    const state = JSON.parse(saved);
+
+                    if (
+                        state.version === 1 &&
+                        state.playersState &&
+                        state.availableBlades &&
+                        state.availableRatchets &&
+                        state.availableBits &&
+                        PLAYER_NAMES.every(name =>
+                            state.playersState[name] &&
+                            Array.isArray(state.playersState[name].beys)
+                        )
+                    ) {
+                        playersState = state.playersState;
+                        availableBlades = state.availableBlades;
+                        availableRatchets = state.availableRatchets;
+                        availableBits = state.availableBits;
+                        activePlayer = PLAYER_NAMES.includes(state.activePlayer)
+                            ? state.activePlayer
+                            : PLAYER_NAMES[0];
+
+                        currentSelection = state.currentSelection || {
+                            blade: null,
+                            ratchet: null,
+                            bit: null
+                        };
+
+                        holds = state.holds || {
+                            blade: false,
+                            ratchet: false,
+                            bit: false
+                        };
+
+                        tournamentState = state.tournamentState || null;
+
+                        setupPlayerSelectDropdown();
+                        updateHoldUI();
+                        renderAll();
+                        renderLeague();
+                        return;
+                    }
+                }
+            } catch (error) {
+                console.error('Impossibile ripristinare il salvataggio:', error);
+            }
+
+            initApp();
+        }
+
+        // --- SVG ICON GENERATOR (Fixes images breaking) ---
+        function getSvgIcon(type, color = "#00f0ff") {
+            if (type === 'blade') {
+                return `
+                <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md">
+                    <circle cx="50" cy="50" r="42" fill="none" stroke="${color}" stroke-width="4" opacity="0.3"/>
+                    <path d="M50 10 L62 28 L85 20 L75 42 L95 55 L72 65 L78 90 L55 78 L38 92 L38 68 L12 62 L28 45 L10 30 L32 26 Z" 
+                          fill="${color}" fill-opacity="0.25" stroke="${color}" stroke-width="3" stroke-linejoin="round"/>
+                    <circle cx="50" cy="50" r="18" fill="#0b0d17" stroke="${color}" stroke-width="3"/>
+                    <circle cx="50" cy="50" r="8" fill="${color}"/>
+                </svg>`;
+            } else if (type === 'ratchet') {
+                return `
+                <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md">
+                    <circle cx="50" cy="50" r="38" fill="none" stroke="${color}" stroke-width="3"/>
+                    <!-- Ratchet Bumps -->
+                    <path d="M50 12 L58 22 L42 22 Z M88 50 L78 58 L78 42 Z M50 88 L42 78 L58 78 Z M12 50 L22 42 L22 58 Z" fill="${color}"/>
+                    <circle cx="50" cy="50" r="26" fill="#0b0d17" stroke="${color}" stroke-width="3"/>
+                    <polygon points="50,32 63,58 37,58" fill="${color}" fill-opacity="0.4"/>
+                </svg>`;
+            } else { // bit
+                return `
+                <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md">
+                    <rect x="38" y="15" width="24" height="25" rx="4" fill="${color}" fill-opacity="0.3" stroke="${color}" stroke-width="3"/>
+                    <path d="M30 40 L70 40 L60 70 L50 88 L40 70 Z" fill="${color}" stroke="${color}" stroke-width="2" stroke-linejoin="round"/>
+                    <circle cx="50" cy="27" r="5" fill="#ffffff"/>
+                </svg>`;
+            }
+        }
+
+        // --- INIT & RESET LOGIC ---
+        function initApp() {
+            availableBlades = JSON.parse(JSON.stringify(ORIGINAL_BLADES));
+            availableRatchets = JSON.parse(JSON.stringify(ORIGINAL_RATCHETS));
+            availableBits = JSON.parse(JSON.stringify(ORIGINAL_BITS));
+
+            playersState = {};
+            PLAYER_NAMES.forEach(name => {
+                playersState[name] = {
+                    name: name,
+                    beys: [] // array of max 3 combo objects { blade, ratchet, bit }
+                };
+            });
+
+            activePlayer = PLAYER_NAMES[0];
+            holds = { blade: false, ratchet: false, bit: false };
+
+            tournamentState = null;
+            
+            setupPlayerSelectDropdown();
+            updateHoldUI();
+            rollReels(true); // Initial roll without animation
+            renderAll();
+        }
+
+        // --- STREAMING_CHUNK:Handling state management and dropdown rendering... ---
+        function setupPlayerSelectDropdown() {
+            const selectEl = document.getElementById('player-select');
+            selectEl.innerHTML = '';
+            PLAYER_NAMES.forEach(name => {
+                const opt = document.createElement('option');
+                opt.value = name;
+                opt.textContent = name;
+                selectEl.appendChild(opt);
+            });
+            selectEl.value = activePlayer;
+
+            selectEl.addEventListener('change', (e) => {
+                activePlayer = e.target.value;
+                updateActivePlayerBadge();
+            });
+        }
+
+        function updateActivePlayerBadge() {
+            const player = playersState[activePlayer];
+            const beyCount = player ? player.beys.length : 0;
+
+            const dotsContainer = document.getElementById('player-progress-dots');
+            dotsContainer.innerHTML = '';
+
+            for (let i = 0; i < 3; i++) {
+                const dot = document.createElement('div');
+                dot.className = `w-3 h-3 rounded-full border transition-all ${
+                    i < beyCount 
+                        ? 'bg-cyan-400 border-cyan-300 shadow-[0_0_8px_rgba(0,240,255,0.8)]' 
+                        : 'bg-gray-800 border-gray-700'
+                }`;
+                dotsContainer.appendChild(dot);
+            }
+
+            const statusText = document.getElementById('player-slot-status');
+            if (beyCount >= 3) {
+                statusText.textContent = "COMPLETO (3/3)";
+                statusText.className = "text-xs font-bold font-orbitron text-amber-400 ml-2";
+            } else {
+                statusText.textContent = `Bey ${beyCount + 1} di 3`;
+                statusText.className = "text-xs font-bold font-orbitron text-cyan-300 ml-2";
+            }
+        }
+
+        // --- SLOT MACHINE ROLL LOGIC ---
+        function getRandomItem(array, previousItem = null) {
+            if (!array || array.length === 0) return null;
+            if (array.length === 1) return array[0];
+
+            let selected;
+            do {
+                const idx = Math.floor(Math.random() * array.length);
+                selected = array[idx];
+            } while (previousItem && selected.id === previousItem.id && array.length > 1);
+
+            return selected;
+        }
+
+        function toggleHold(type) {
+            holds[type] = !holds[type];
+            updateHoldUI();
+        }
+
+        function updateHoldUI() {
+            ['blade', 'ratchet', 'bit'].forEach(type => {
+                const isHeld = holds[type];
+                const btn = document.getElementById(`hold-${type}-btn`);
+                const icon = document.getElementById(`hold-icon-${type}`);
+                const card = document.getElementById(`reel-card-${type}`);
+
+                if (isHeld) {
+                    btn.classList.remove('bg-gray-800', 'text-cyan-400', 'text-fuchsia-400', 'text-amber-400');
+                    btn.classList.add('bg-red-500/20', 'text-red-400', 'border-red-500');
+                    icon.textContent = "🔒";
+                    card.classList.add('ring-2', 'ring-red-500/60');
+                } else {
+                    btn.classList.remove('bg-red-500/20', 'text-red-400', 'border-red-500');
+                    btn.classList.add('bg-gray-800');
+                    if (type === 'blade') btn.classList.add('text-cyan-400');
+                    if (type === 'ratchet') btn.classList.add('text-fuchsia-400');
+                    if (type === 'bit') btn.classList.add('text-amber-400');
+                    icon.textContent = "🔓";
+                    card.classList.remove('ring-2', 'ring-red-500/60');
+                }
+            });
+        }
+
+        function rollReels(instant = false) {
+            if (isSpinning) return;
+
+            // Check pool availability
+            if (!holds.blade && availableBlades.length === 0) {
+                alert("Nessuna Lama rimanente nel pool!");
+                return;
+            }
+            if (!holds.ratchet && availableRatchets.length === 0) {
+                alert("Nessun Ratchet rimanente nel pool!");
+                return;
+            }
+            if (!holds.bit && availableBits.length === 0) {
+                alert("Nessuna Punta rimanente nel pool!");
+                return;
+            }
+
+            if (instant) {
+                if (!holds.blade) currentSelection.blade = getRandomItem(availableBlades, currentSelection.blade);
+                if (!holds.ratchet) currentSelection.ratchet = getRandomItem(availableRatchets, currentSelection.ratchet);
+                if (!holds.bit) currentSelection.bit = getRandomItem(availableBits, currentSelection.bit);
+                updateReelDisplays();
+                updateStatsPreview();
+                return;
+            }
+
+            isSpinning = true;
+            const spinBtn = document.getElementById('spin-btn');
+            spinBtn.disabled = true;
+            spinBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            const reelDisplays = {
+                blade: document.getElementById('reel-display-blade'),
+                ratchet: document.getElementById('reel-display-ratchet'),
+                bit: document.getElementById('reel-display-bit')
+            };
+
+            // Add spinning blur
+            if (!holds.blade) reelDisplays.blade.classList.add('reel-spinning');
+            if (!holds.ratchet) reelDisplays.ratchet.classList.add('reel-spinning');
+            if (!holds.bit) reelDisplays.bit.classList.add('reel-spinning');
+
+            let counter = 0;
+            const interval = setInterval(() => {
+                counter++;
+                if (!holds.blade) currentSelection.blade = getRandomItem(availableBlades);
+                if (!holds.ratchet) currentSelection.ratchet = getRandomItem(availableRatchets);
+                if (!holds.bit) currentSelection.bit = getRandomItem(availableBits);
+
+                updateReelDisplays();
+
+                if (counter > 12) {
+                    clearInterval(interval);
+                    if (!holds.blade) reelDisplays.blade.classList.remove('reel-spinning');
+                    if (!holds.ratchet) reelDisplays.ratchet.classList.remove('reel-spinning');
+                    if (!holds.bit) reelDisplays.bit.classList.remove('reel-spinning');
+
+                    isSpinning = false;
+                    spinBtn.disabled = false;
+                    spinBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    updateStatsPreview();
+                }
+            }, 80);
+        }
+
+        function updateReelDisplays() {
+            // Blade Display
+            if (currentSelection.blade) {
+                document.getElementById('blade-title').textContent = currentSelection.blade.name + ' (' + currentSelection.blade.type + ')';
+                document.getElementById('blade-weight').textContent = `${currentSelection.blade.weight.toFixed(1)}g` + ' - Spin ' + currentSelection.blade.spin + ' - Rank ' + currentSelection.blade.rank;
+                const bladeImage = document.getElementById('blade-svg-container');
+                bladeImage.innerHTML = currentSelection.blade.image
+                    ? `<img src="${currentSelection.blade.image}" alt="${currentSelection.blade.name}" class="w-full h-full object-contain">`
+                    : getSvgIcon('blade', currentSelection.blade.color);
+            }
+
+            // Ratchet Display
+            if (currentSelection.ratchet) {
+                document.getElementById('ratchet-title').textContent = currentSelection.ratchet.name;
+                document.getElementById('ratchet-weight').textContent = `${currentSelection.ratchet.weight.toFixed(1)}g` + ' - Rank ' + currentSelection.ratchet.rank;
+                const ratchetImage = document.getElementById('ratchet-svg-container');
+                ratchetImage.innerHTML = currentSelection.ratchet.image
+                    ? `<img src="${currentSelection.ratchet.image}" alt="${currentSelection.ratchet.name}" class="w-full h-full object-contain">`
+                    : getSvgIcon('ratchet', currentSelection.ratchet.color);
+            }
+
+            // Bit Display
+            if (currentSelection.bit) {
+                document.getElementById('bit-title').textContent = currentSelection.bit.name + ' (' + currentSelection.bit.type + ')';
+                document.getElementById('bit-weight').textContent = `${currentSelection.bit.weight.toFixed(1)}g` + ' - Rank ' + currentSelection.bit.rank;
+                const bitImage = document.getElementById('bit-svg-container');
+                bitImage.innerHTML = currentSelection.bit.image
+                    ? `<img src="${currentSelection.bit.image}" alt="${currentSelection.bit.name}" class="w-full h-full object-contain">`
+                    : getSvgIcon('bit', currentSelection.bit.color);
+            }
+
+            // Counts
+            document.getElementById('count-blade').textContent = `${availableBlades.length} Rimanenti`;
+            document.getElementById('count-ratchet').textContent = `${availableRatchets.length} Rimanenti`;
+            document.getElementById('count-bit').textContent = `${availableBits.length} Rimanenti`;
+        }
+
+        function updateStatsPreview() {
+            const b = currentSelection.blade || { atk:0, def:0, sta:0, weight:0 };
+            const r = currentSelection.ratchet || { atk:0, def:0, sta:0, weight:0 };
+            const t = currentSelection.bit || { atk:0, def:0, sta:0, weight:0 };
+
+            const totalAtk = b.atk + r.atk + t.atk;
+            const totalDef = b.def + r.def + t.sta;
+            const totalSta = b.sta + r.sta + t.sta;
+            const totalWeight = (b.weight + r.weight + t.weight).toFixed(1);
+
+            document.getElementById('stat-val-atk').textContent = totalAtk;
+            document.getElementById('stat-val-def').textContent = totalDef;
+            document.getElementById('stat-val-sta').textContent = totalSta;
+
+            // Cap percentage at 150 max stat
+            document.getElementById('stat-bar-atk').style.width = `${Math.min(100, (totalAtk / 150) * 100)}%`;
+            document.getElementById('stat-bar-def').style.width = `${Math.min(100, (totalDef / 150) * 100)}%`;
+            document.getElementById('stat-bar-sta').style.width = `${Math.min(100, (totalSta / 150) * 100)}%`;
+
+            document.getElementById('total-weight-badge').textContent = `Peso Totale: ${totalWeight}g`;
+        }
+
+        function buildAndAssignBey() {
+            const player = playersState[activePlayer];
+            
+            if (player.beys.length >= 3) {
+                alert(`Il giocatore ${activePlayer} ha già 3 Beyblade! Seleziona un altro giocatore.`);
+                return;
+            }
+
+            if (!currentSelection.blade || !currentSelection.ratchet || !currentSelection.bit) {
+                alert("Errore nella selezione dei componenti.");
+                return;
+            }
+
+            // Construct Bey object
+            const beyCombo = {
+                id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+                blade: { ...currentSelection.blade },
+                ratchet: { ...currentSelection.ratchet },
+                bit: { ...currentSelection.bit },
+                totalWeight: parseFloat((currentSelection.blade.weight + currentSelection.ratchet.weight + currentSelection.bit.weight).toFixed(1)),
+                totalAtk: currentSelection.blade.atk + currentSelection.ratchet.atk + currentSelection.bit.atk,
+                totalDef: currentSelection.blade.def + currentSelection.ratchet.def + currentSelection.bit.def,
+                totalSta: currentSelection.blade.sta + currentSelection.ratchet.sta + currentSelection.bit.sta
+            };
+
+            // Remove items from available pool
+            availableBlades = availableBlades.filter(x => x.id !== currentSelection.blade.id);
+            availableRatchets = availableRatchets.filter(x => x.id !== currentSelection.ratchet.id);
+            availableBits = availableBits.filter(x => x.id !== currentSelection.bit.id);
+
+            // Save combo to player
+            player.beys.push(beyCombo);
+
+            // Reset HOLDS for next draft
+            holds = { blade: false, ratchet: false, bit: false };
+            updateHoldUI();
+
+            // Re-roll slot machine automatically for next combo
+            rollReels(true);
+
+            // Auto switch player if current player reached 3
+            if (player.beys.length >= 3) {
+                const nextPlayer = PLAYER_NAMES.find(n => playersState[n].beys.length < 3);
+                if (nextPlayer) {
+                    activePlayer = nextPlayer;
+                    document.getElementById('player-select').value = activePlayer;
+                }
+            }
+
+            renderAll();
+        }
+
+        function dismantleBey(playerName, beyId) {
+            const player = playersState[playerName];
+            if (!player) return;
+
+            const beyIndex = player.beys.findIndex(b => b.id === beyId);
+            if (beyIndex === -1) return;
+
+            const [removedBey] = player.beys.splice(beyIndex, 1);
+
+            // Return parts to pool
+            availableBlades.push(removedBey.blade);
+            availableRatchets.push(removedBey.ratchet);
+            availableBits.push(removedBey.bit);
+
+            // Sort pool back
+            availableBlades.sort((a,b) => a.name.localeCompare(b.name));
+            availableRatchets.sort((a,b) => a.name.localeCompare(b.name));
+            availableBits.sort((a,b) => a.name.localeCompare(b.name));
+
+            renderAll();
+        }
+
+        function renderAll() {
+            updateActivePlayerBadge();
+            updateReelDisplays();
+            updateStatsPreview();
+
+            // Total global Beyblades count
+            let totalAssigned = 0;
+            PLAYER_NAMES.forEach(n => totalAssigned += playersState[n].beys.length);
+            document.getElementById('global-bey-count').textContent = `${totalAssigned} / 24`;
+
+            // Render Roster
+            const rosterContainer = document.getElementById('players-roster-container');
+            rosterContainer.innerHTML = '';
+
+            PLAYER_NAMES.forEach(name => {
+                const player = playersState[name];
+                const isActive = name === activePlayer;
+
+                const playerCard = document.createElement('div');
+                playerCard.className = `bg-gray-950/80 rounded-xl p-3 border transition-all ${
+                    isActive ? 'border-cyan-500/80 ring-1 ring-cyan-500/30' : 'border-gray-800/80'
+                }`;
+
+                let beysListHtml = '';
+
+                if (player.beys.length === 0) {
+                    beysListHtml = `<p class="text-xs text-gray-500 italic py-2 text-center">Nessun Beyblade assegnato</p>`;
+                } else {
+                    beysListHtml = player.beys.map((bey, idx) => `
+                        <div class="bg-gray-900/90 rounded-lg p-2.5 border border-gray-800 flex items-center justify-between gap-2 mt-2">
+                            <div class="flex items-center gap-2">
+                                <div class="w-12 h-12 flex-shrink-0">
+                                    ${
+                                        bey.blade.image
+                                            ? `<img src="${bey.blade.image}"
+                                                alt="${bey.blade.name}"
+                                                class="w-full h-full object-contain">`
+                                            : getSvgIcon('blade', bey.blade.color)
+                                    }
+                                </div>
+                                <div>
+                                    <div class="text-[12px] font-bold font-orbitron text-white">
+                                        ${bey.blade.name} (${bey.blade.type}) - Rank ${bey.blade.rank}<br>
+                                        <span class="text-cyan-400">${bey.ratchet.name} - Rank ${bey.ratchet.rank}</span><br>
+                                        <span class="text-amber-400">${bey.bit.name} (${bey.bit.type}) - Rank ${bey.bit.rank}</span>
+                                    </div>
+                                    <div class="text-[14px] text-gray-400 flex gap-2 font-semibold">
+                                        <span>⚖️ ${bey.totalWeight}g</span>
+                                        <span class="text-red-400">⚔️ ${bey.totalAtk}</span>
+                                        <span class="text-blue-400">🛡️ ${bey.totalDef}</span>
+                                        <span class="text-emerald-400">🌀 ${bey.totalSta}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button onclick="dismantleBey('${name}', '${bey.id}')" class="text-[10px] bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-1 rounded transition flex-shrink-0" title="Smonta combo">
+                                ✖
+                            </button>
+                        </div>
+                    `).join('');
+                }
+
+                playerCard.innerHTML = `
+                    <div class="flex justify-between items-center cursor-pointer" onclick="setActivePlayer('${name}')">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full ${player.beys.length === 3 ? 'bg-amber-400' : 'bg-cyan-400'}"></span>
+                            <span class="font-orbitron font-bold text-sm text-white">${name}</span>
+                        </div>
+                        <span class="text-xs font-bold ${player.beys.length === 3 ? 'text-amber-400' : 'text-gray-400'}">
+                            ${player.beys.length} / 3 Bey
+                        </span>
+                    </div>
+                    ${beysListHtml}
+                `;
+
+                rosterContainer.appendChild(playerCard);
+            });
+
+            saveDraftState();
+        }
+
+        function exportDraftJSON() {
+            // Crea una copia completa dello stato del draft
+            const draftData = {
+                title: "Beyblade X Draft & Combo Builder",
+                version: 1,
+                exportedAt: new Date().toISOString(),
+                activePlayer: activePlayer,
+
+                players: playersState,
+
+                availableComponents: {
+                    blades: availableBlades,
+                    ratchets: availableRatchets,
+                    bits: availableBits
+                },
+
+                currentSelection: currentSelection,
+                holds: holds
+            };
+
+            // Converte i dati in JSON leggibile
+            const jsonString = JSON.stringify(draftData, null, 2);
+
+            // Crea il file da scaricare
+            const blob = new Blob(
+                [jsonString],
+                { type: "application/json;charset=utf-8" }
+            );
+
+            const url = URL.createObjectURL(blob);
+
+            // Genera un nome file con data e ora
+            const timestamp = new Date()
+                .toISOString()
+                .replace(/[:.]/g, "-");
+
+            const filename = `beyblade-draft-${timestamp}.json`;
+
+            // Avvia il download
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = filename;
+
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+
+            // Libera la risorsa temporanea
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+
+        function importDraftJSON(file) {
+            if (!file) return;
+
+            const reader = new FileReader();
+
+            reader.onload = function (event) {
+                try {
+                    const data = JSON.parse(event.target.result);
+
+                    // Verifica la struttura principale
+                    if (
+                        !data ||
+                        !data.players ||
+                        !Array.isArray(data.availableComponents?.blades) ||
+                        !Array.isArray(data.availableComponents?.ratchets) ||
+                        !Array.isArray(data.availableComponents?.bits)
+                    ) {
+                        throw new Error("Struttura JSON non valida.");
+                    }
+
+                    // Verifica che siano presenti tutti i giocatori previsti
+                    for (const name of PLAYER_NAMES) {
+                        const player = data.players[name];
+
+                        if (
+                            !player ||
+                            !Array.isArray(player.beys) ||
+                            player.beys.length > 3
+                        ) {
+                            throw new Error(
+                                `Dati mancanti o non validi per ${name}.`
+                            );
+                        }
+
+                        // Verifica che ogni combo contenga tutti i componenti
+                        for (const bey of player.beys) {
+                            if (
+                                !bey.id ||
+                                !bey.blade ||
+                                !bey.ratchet ||
+                                !bey.bit
+                            ) {
+                                throw new Error(
+                                    `Combo non valida per ${name}.`
+                                );
+                            }
+                        }
+                    }
+
+                    // Verifica la selezione corrente
+                    const selection = data.currentSelection;
+
+                    if (
+                        !selection ||
+                        !["blade", "ratchet", "bit"].every(
+                            key =>
+                                selection[key] === null ||
+                                (
+                                    selection[key] &&
+                                    typeof selection[key] === "object" &&
+                                    typeof selection[key].id === "string"
+                                )
+                        )
+                    ) {
+                        throw new Error(
+                            "La selezione corrente non è valida."
+                        );
+                    }
+
+                    // Verifica il giocatore attivo
+                    const restoredActivePlayer =
+                        PLAYER_NAMES.includes(data.activePlayer)
+                            ? data.activePlayer
+                            : PLAYER_NAMES[0];
+
+                    // Prepara lo stato prima di applicarlo
+                    const restoredPlayers = {};
+
+                    for (const name of PLAYER_NAMES) {
+                        restoredPlayers[name] = {
+                            name,
+                            beys: data.players[name].beys
+                        };
+                    }
+
+                    const restoredHolds = {
+                        blade: data.holds?.blade === true,
+                        ratchet: data.holds?.ratchet === true,
+                        bit: data.holds?.bit === true
+                    };
+
+                    // Applica i dati importati
+                    playersState = restoredPlayers;
+
+                    availableBlades =
+                        data.availableComponents.blades;
+                    availableRatchets =
+                        data.availableComponents.ratchets;
+                    availableBits =
+                        data.availableComponents.bits;
+
+                    currentSelection = {
+                        blade: selection.blade,
+                        ratchet: selection.ratchet,
+                        bit: selection.bit
+                    };
+
+                    activePlayer = restoredActivePlayer;
+                    holds = restoredHolds;
+
+                    // Aggiorna tutta l'interfaccia
+                    document.getElementById("player-select").value =
+                        activePlayer;
+
+                    updateHoldUI();
+                    renderAll();
+
+                    alert("Draft importato correttamente!");
+
+                } catch (error) {
+                    console.error("Errore importazione JSON:", error);
+
+                    alert(
+                        "Impossibile importare il file JSON.\n" +
+                        error.message
+                    );
+                }
+            };
+
+            reader.onerror = function () {
+                alert("Errore durante la lettura del file.");
+            };
+
+            reader.readAsText(file);
+        }
+
+        function setActivePlayer(name) {
+            activePlayer = name;
+            document.getElementById('player-select').value = activePlayer;
+            renderAll();
+        }
+
+        /* ==========================================
+        CAMPIONATO ROUND ROBIN
+        ========================================== */
+
+        // Genera 7 giornate con 4 incontri ciascuna.
+        // Ogni coppia di giocatori si incontra una sola volta.
+        function generateLeague() {
+            const completeDraft = PLAYER_NAMES.every(name =>
+                playersState[name] &&
+                playersState[name].beys.length === 3 &&
+                playersState[name].beys.every(bey =>
+                    bey.blade && bey.ratchet && bey.bit
+                )
+            );
+
+            if (!completeDraft) {
+                alert(
+                    'Completa prima il draft: tutti gli 8 giocatori ' +
+                    'devono avere esattamente 3 Beyblade.'
+                );
+                return;
+            }
+
+            if (
+                tournamentState &&
+                Object.keys(tournamentState.results || {}).length > 0
+            ) {
+                if (!confirm(
+                    'Esiste già un campionato con risultati. ' +
+                    'Vuoi generare un nuovo calendario e cancellare ' +
+                    'tutti i risultati precedenti?'
+                )) {
+                    return;
+                }
+            }
+
+            const rotation = [...PLAYER_NAMES];
+            const rounds = [];
+
+            for (let roundIndex = 0; roundIndex < 7; roundIndex++) {
+                const matches = [];
+
+                for (let i = 0; i < rotation.length / 2; i++) {
+                    const playerA = rotation[i];
+                    const playerB = rotation[rotation.length - 1 - i];
+
+                    matches.push({
+                        id: `round-${roundIndex + 1}-match-${i + 1}`,
+                        playerA,
+                        playerB
+                    });
+                }
+
+                rounds.push({
+                    number: roundIndex + 1,
+                    matches
+                });
+
+                // Sistema a rotazione: il primo giocatore resta fisso.
+                const lastPlayer = rotation.pop();
+                rotation.splice(1, 0, lastPlayer);
+            }
+
+            tournamentState = {
+                version: 1,
+                format: 'round-robin-team',
+                pointsForWin: 3,
+                rounds,
+                results: {}
+            };
+
+            saveDraftState();
+            renderLeague();
+        }
+
+        // Calcola la classifica a partire dai risultati registrati.
+        function calculateStandings() {
+            const table = {};
+
+            PLAYER_NAMES.forEach(name => {
+                table[name] = {
+                    name,
+                    played: 0,
+                    wins: 0,
+                    losses: 0,
+                    pointsFor: 0,
+                    pointsAgainst: 0,
+                    points: 0
+                };
+            });
+
+            if (!tournamentState) {
+                return Object.values(table);
+            }
+
+            for (const round of tournamentState.rounds) {
+                for (const match of round.matches) {
+                    const result = tournamentState.results[match.id];
+
+                    if (!result) continue;
+
+                    const a = table[match.playerA];
+                    const b = table[match.playerB];
+
+                    a.played++;
+                    b.played++;
+
+                    a.pointsFor += result.scoreA;
+                    a.pointsAgainst += result.scoreB;
+
+                    b.pointsFor += result.scoreB;
+                    b.pointsAgainst += result.scoreA;
+
+                    if (result.scoreA > result.scoreB) {
+                        a.wins++;
+                        b.losses++;
+                        a.points += 3;
+                    } else if (result.scoreB > result.scoreA) {
+                        b.wins++;
+                        a.losses++;
+                        b.points += 3;
+                    }
+                }
+            }
+
+            return Object.values(table).sort((a, b) =>
+                b.points - a.points ||
+                (b.pointsFor - b.pointsAgainst) -
+                    (a.pointsFor - a.pointsAgainst) ||
+                b.pointsFor - a.pointsFor ||
+                a.name.localeCompare(b.name)
+            );
+        }
+
+        // Visualizza la classifica.
+        function renderStandings() {
+            const tbody = document.getElementById('league-standings-body');
+            const standings = calculateStandings();
+
+            tbody.innerHTML = standings.map((player, index) => {
+                const diff = player.pointsFor - player.pointsAgainst;
+                const isLeader = index === 0 && player.points > 0;
+
+                return `
+                    <tr class="${isLeader ? 'bg-amber-500/10' : 'bg-gray-900/40'}">
+                        <td class="p-3 font-orbitron font-bold ${
+                            index === 0 ? 'text-amber-400' : 'text-gray-400'
+                        }">${index + 1}</td>
+
+                        <td class="p-3 font-bold text-white whitespace-nowrap">
+                            ${player.name}
+                            ${isLeader ? '<span class="ml-1">👑</span>' : ''}
+                        </td>
+
+                        <td class="p-3 text-gray-300">${player.played}</td>
+                        <td class="p-3 text-emerald-400">${player.wins}</td>
+                        <td class="p-3 text-red-400">${player.losses}</td>
+                        <td class="p-3 text-gray-300">${player.pointsFor}</td>
+                        <td class="p-3 text-gray-300">${player.pointsAgainst}</td>
+
+                        <td class="p-3 font-bold ${
+                            diff > 0 ? 'text-emerald-400' :
+                            diff < 0 ? 'text-red-400' : 'text-gray-400'
+                        }">${diff > 0 ? '+' : ''}${diff}</td>
+
+                        <td class="p-3 font-orbitron font-bold text-cyan-400">
+                            ${player.points}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Registra un risultato. I pareggi non sono consentiti.
+        function saveMatchResult(matchId) {
+            if (!tournamentState) return;
+
+            const match = tournamentState.rounds
+                .flatMap(round => round.matches)
+                .find(item => item.id === matchId);
+
+            if (!match) return;
+
+            const inputA = document.getElementById(`${matchId}-score-a`);
+            const inputB = document.getElementById(`${matchId}-score-b`);
+
+            const rawA = inputA.value.trim();
+            const rawB = inputB.value.trim();
+
+            if (
+                rawA === '' ||
+                rawB === '' ||
+                !Number.isInteger(Number(rawA)) ||
+                !Number.isInteger(Number(rawB)) ||
+                Number(rawA) < 0 ||
+                Number(rawB) < 0
+            ) {
+                alert('Inserisci due punteggi interi, uguali o superiori a zero.');
+                return;
+            }
+
+            const scoreA = Number(rawA);
+            const scoreB = Number(rawB);
+
+            if (scoreA === scoreB) {
+                alert('Il pareggio non è ammesso. Inserisci il risultato definitivo.');
+                return;
+            }
+
+            tournamentState.results[matchId] = {
+                scoreA,
+                scoreB,
+                winner: scoreA > scoreB ? match.playerA : match.playerB,
+                updatedAt: new Date().toISOString()
+            };
+
+            saveDraftState();
+            renderLeague();
+        }
+
+        // Permette di correggere un risultato cancellandolo.
+        function clearMatchResult(matchId) {
+            if (!tournamentState || !tournamentState.results[matchId]) return;
+
+            if (!confirm('Vuoi cancellare questo risultato?')) return;
+
+            delete tournamentState.results[matchId];
+
+            saveDraftState();
+            renderLeague();
+        }
+
+        // Visualizza tutte le giornate e i relativi incontri.
+        let leagueOpenRounds = new Set([1]);
+        function renderLeague() {
+            const roundsContainer = document.getElementById('league-rounds');
+            const status = document.getElementById('league-status');
+
+            // Memorizza lo stato degli accordion prima di ricrearli.
+            const openRounds = new Set(
+                Array.from(roundsContainer.querySelectorAll('details'))
+                    .filter(details => details.open)
+                    .map(details => details.querySelector('summary')?.textContent.trim())
+            );
+
+            if (!tournamentState || !Array.isArray(tournamentState.rounds)) {
+                roundsContainer.innerHTML = `
+                    <p class="text-sm text-gray-500">
+                        Genera il calendario per iniziare il campionato.
+                    </p>
+                `;
+
+                status.textContent =
+                    'Completa il draft di tutti gli 8 giocatori per generare il calendario.';
+
+                renderStandings();
+                return;
+            }
+
+            const totalMatches = tournamentState.rounds.reduce(
+                (sum, round) => sum + round.matches.length,
+                0
+            );
+
+            const completedMatches = Object.keys(tournamentState.results).length;
+
+            status.innerHTML = `
+                <div class="flex flex-wrap justify-between gap-2">
+                    <span class="text-cyan-400 font-bold">
+                        ${completedMatches} / ${totalMatches} incontri completati
+                    </span>
+                    <span class="text-gray-400">
+                        ${7 - tournamentState.rounds.filter(round =>
+                            round.matches.every(match =>
+                                tournamentState.results[match.id]
+                            )
+                        ).length} giornate ancora da completare
+                    </span>
+                </div>
+                <div class="w-full h-2 bg-gray-800 rounded-full overflow-hidden mt-3">
+                    <div class="h-full bg-gradient-to-r from-cyan-400 to-fuchsia-500"
+                        style="width:${totalMatches ? completedMatches / totalMatches * 100 : 0}%">
+                    </div>
+                </div>
+            `;
+
+            roundsContainer.innerHTML = tournamentState.rounds.map(round => {
+                const roundCompleted = round.matches.every(match =>
+                    tournamentState.results[match.id]
+                );
+
+                const roundLabel = `Giornata ${round.number}`;
+
+                // Mantieni lo stato precedente; alla prima apertura mostra la giornata 1.
+                const shouldOpen = openRounds.size > 0
+                    ? openRounds.has(roundLabel)
+                    : round.number === 1;
+
+                return `
+                    <details
+                        data-round="${round.number}"
+                        class="bg-gray-950/70 border ${
+                            roundCompleted ? 'border-emerald-500/30' : 'border-gray-800'
+                        } rounded-xl overflow-hidden"
+                        ${leagueOpenRounds.has(round.number) ? 'open' : ''}
+                    >
+
+                        <summary class="cursor-pointer p-4 flex justify-between items-center gap-3">
+                            <span class="font-orbitron font-bold text-white">
+                                Giornata ${round.number}
+                            </span>
+                            <span class="text-xs ${
+                                roundCompleted ? 'text-emerald-400' : 'text-gray-400'
+                            }">
+                                ${round.matches.filter(match =>
+                                    tournamentState.results[match.id]
+                                ).length} / 4 completati
+                            </span>
+                        </summary>
+
+                        <div class="px-3 pb-3 space-y-3">
+                            ${round.matches.map(match => {
+                                const result = tournamentState.results[match.id];
+                                const scoreA = result ? result.scoreA : '';
+                                const scoreB = result ? result.scoreB : '';
+
+                                const winnerA = result && result.winner === match.playerA;
+                                const winnerB = result && result.winner === match.playerB;
+
+                                const teamA = playersState[match.playerA];
+                                const teamB = playersState[match.playerB];
+
+                                return `
+                                    <div class="bg-gray-900 border border-gray-800 rounded-xl p-3">
+                                        <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+                                            <div class="min-w-0">
+                                                <div class="font-bold text-[18px] ${
+                                                    winnerA ? 'text-emerald-400' : 'text-white'
+                                                }">${match.playerA}</div>
+                                                <div class="flex gap-1 mt-2">
+                                                    ${teamA.beys.map(bey => `
+                                                        <div title="${bey.blade.name}"
+                                                            class="w-8 h-8 rounded bg-gray-950 border border-gray-700 p-0.5">
+                                                            ${bey.blade.image
+                                                                ? `<img src="${bey.blade.image}" alt="${bey.blade.name}" class="w-full h-full object-contain" onerror="this.style.display='none'">`
+                                                                : getSvgIcon('blade', bey.blade.color)
+                                                            }
+                                                        </div>
+                                                    `).join('')}
+                                                </div>
+                                            </div>
+
+                                            <div class="flex items-center justify-center gap-2">
+
+                                                <!-- PUNTEGGIO GIOCATORE A -->
+                                                <div class="flex flex-col items-center gap-1">
+
+                                                    <button
+                                                        type="button"
+                                                        onclick="changeMatchScore('${match.id}', 'a', 1)"
+                                                        class="w-9 h-8 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/30
+                                                            border border-emerald-500/40 text-emerald-400 font-black
+                                                            text-lg transition active:scale-95"
+                                                        aria-label="Aumenta punteggio ${match.playerA}">
+                                                        +
+                                                    </button>
+
+                                                    <input
+                                                        id="${match.id}-score-a"
+                                                        type="number"
+                                                        min="0"
+                                                        step="1"
+                                                        value="${scoreA}"
+                                                        readonly
+                                                        aria-label="Punteggio ${match.playerA}"
+                                                        class="w-12 text-center bg-gray-950 border border-gray-700
+                                                            rounded-lg p-2 text-white font-orbitron font-bold">
+
+                                                    <button
+                                                        type="button"
+                                                        onclick="changeMatchScore('${match.id}', 'a', -1)"
+                                                        class="w-9 h-8 rounded-lg bg-red-500/15 hover:bg-red-500/30
+                                                            border border-red-500/40 text-red-400 font-black
+                                                            text-lg transition active:scale-95"
+                                                        aria-label="Diminuisci punteggio ${match.playerA}">
+                                                        −
+                                                    </button>
+                                                </div>
+
+                                                <span class="text-gray-500 font-orbitron font-bold self-center">:</span>
+
+                                                <!-- PUNTEGGIO GIOCATORE B -->
+                                                <div class="flex flex-col items-center gap-1">
+
+                                                    <button
+                                                        type="button"
+                                                        onclick="changeMatchScore('${match.id}', 'b', 1)"
+                                                        class="w-9 h-8 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/30
+                                                            border border-emerald-500/40 text-emerald-400 font-black
+                                                            text-lg transition active:scale-95"
+                                                        aria-label="Aumenta punteggio ${match.playerB}">
+                                                        +
+                                                    </button>
+
+                                                    <input
+                                                        id="${match.id}-score-b"
+                                                        type="number"
+                                                        min="0"
+                                                        step="1"
+                                                        value="${scoreB}"
+                                                        readonly
+                                                        aria-label="Punteggio ${match.playerB}"
+                                                        class="w-12 text-center bg-gray-950 border border-gray-700
+                                                            rounded-lg p-2 text-white font-orbitron font-bold">
+
+                                                    <button
+                                                        type="button"
+                                                        onclick="changeMatchScore('${match.id}', 'b', -1)"
+                                                        class="w-9 h-8 rounded-lg bg-red-500/15 hover:bg-red-500/30
+                                                            border border-red-500/40 text-red-400 font-black
+                                                            text-lg transition active:scale-95"
+                                                        aria-label="Diminuisci punteggio ${match.playerB}">
+                                                        -
+                                                    </button>
+                                                </div>
+
+                                            </div>
+
+                                            <div class="min-w-0 text-right">
+                                                <div class="font-bold text-[18px] ${
+                                                    winnerB ? 'text-emerald-400' : 'text-white'
+                                                }">${match.playerB}</div>
+                                                <div class="flex justify-end gap-1 mt-2">
+                                                    ${teamB.beys.map(bey => `
+                                                        <div title="${bey.blade.name}"
+                                                            class="w-8 h-8 rounded bg-gray-950 border border-gray-700 p-0.5">
+                                                            ${bey.blade.image
+                                                                ? `<img src="${bey.blade.image}" alt="${bey.blade.name}" class="w-full h-full object-contain" onerror="this.style.display='none'">`
+                                                                : getSvgIcon('blade', bey.blade.color)
+                                                            }
+                                                        </div>
+                                                    `).join('')}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="flex flex-wrap justify-between items-center gap-2 mt-3">
+                                            <span class="text-[18px] ${
+                                                result ? 'text-emerald-400' : 'text-gray-500'
+                                            }">
+                                                ${result ? `Vincitore: ${result.winner}` : 'Da disputare'}
+                                            </span>
+
+                                            <div class="flex gap-2">
+                                                <button
+                                                    onclick="saveMatchResult('${match.id}')"
+                                                    class="bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 px-3 py-1.5 rounded-lg text-xs font-bold">
+                                                    ${result ? 'Aggiorna' : 'Salva risultato'}
+                                                </button>
+
+                                                ${result ? `
+                                                    <button
+                                                        onclick="clearMatchResult('${match.id}')"
+                                                        class="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg text-xs">
+                                                        Cancella
+                                                    </button>
+                                                ` : ''}
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </details>
+                `;
+            }).join('');
+
+            roundsContainer.querySelectorAll('details[data-round]').forEach(details => {
+                details.addEventListener('toggle', () => {
+                    const roundNumber = Number(details.dataset.round);
+
+                    if (details.open) {
+                        leagueOpenRounds.add(roundNumber);
+                    } else {
+                        leagueOpenRounds.delete(roundNumber);
+                    }
+                });
+            });
+
+            renderStandings();
+        }
+
+        function changeMatchScore(matchId, side, delta) {
+            const input = document.getElementById(
+                `${matchId}-score-${side}`
+            );
+
+            if (!input) return;
+
+            const current = Number.parseInt(input.value, 10);
+            const score = Number.isFinite(current) ? current : 0;
+
+            input.value = Math.max(0, score + delta);
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+
+        /* ==========================================
+        ESPORTAZIONE E IMPORTAZIONE JSON
+        ========================================== */
+
+        function exportLeagueJSON() {
+            console.log("ciao")
+            const data = {
+                app: 'Beyblade X Draft',
+                version: 1,
+                exportedAt: new Date().toISOString(),
+                activePlayer,
+                playersState,
+                availableBlades,
+                availableRatchets,
+                availableBits,
+                currentSelection,
+                holds,
+                tournamentState
+            };
+
+            const blob = new Blob(
+                [JSON.stringify(data, null, 2)],
+                { type: 'application/json;charset=utf-8' }
+            );
+
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+
+            link.href = url;
+            link.download = 'beyblade-x-campionato.json';
+
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+
+        function importLeagueJSON(file) {
+            if (!file) return;
+
+            const reader = new FileReader();
+
+            reader.onload = function (event) {
+                try {
+                    const data = JSON.parse(event.target.result);
+
+                    // Controlli minimi sul formato del file.
+                    if (
+                        data.version !== 1 ||
+                        !data.playersState ||
+                        !Array.isArray(data.availableBlades) ||
+                        !Array.isArray(data.availableRatchets) ||
+                        !Array.isArray(data.availableBits) ||
+                        !PLAYER_NAMES.every(name =>
+                            data.playersState[name] &&
+                            Array.isArray(data.playersState[name].beys) &&
+                            data.playersState[name].beys.length <= 3
+                        )
+                    ) {
+                        throw new Error('Formato JSON non riconosciuto.');
+                    }
+
+                    const league = data.tournamentState;
+
+                    if (league !== null && league !== undefined) {
+                        if (
+                            league.version !== 1 ||
+                            league.format !== 'round-robin-team' ||
+                            !Array.isArray(league.rounds) ||
+                            league.rounds.length !== 7 ||
+                            !league.results ||
+                            typeof league.results !== 'object'
+                        ) {
+                            throw new Error('Dati del campionato non validi.');
+                        }
+
+                        const allMatches = league.rounds.flatMap(
+                            round => round.matches
+                        );
+
+                        if (
+                            allMatches.length !== 28 ||
+                            new Set(allMatches.map(match => match.id)).size !== 28 ||
+                            allMatches.some(match =>
+                                !PLAYER_NAMES.includes(match.playerA) ||
+                                !PLAYER_NAMES.includes(match.playerB) ||
+                                match.playerA === match.playerB
+                            )
+                        ) {
+                            throw new Error('Calendario del campionato non valido.');
+                        }
+
+                        // Verifica i punteggi importati.
+                        for (const [matchId, result] of Object.entries(league.results)) {
+                            const match = allMatches.find(m => m.id === matchId);
+
+                            if (
+                                !match ||
+                                !Number.isInteger(result.scoreA) ||
+                                !Number.isInteger(result.scoreB) ||
+                                result.scoreA < 0 ||
+                                result.scoreB < 0 ||
+                                result.scoreA === result.scoreB ||
+                                result.winner !== (
+                                    result.scoreA > result.scoreB
+                                        ? match.playerA
+                                        : match.playerB
+                                )
+                            ) {
+                                throw new Error('Uno o più risultati non sono validi.');
+                            }
+                        }
+                    }
+
+                    if (!confirm(
+                        'Importare questo file sostituirà il draft e il campionato ' +
+                        'attualmente presenti. Vuoi continuare?'
+                    )) {
+                        return;
+                    }
+
+                    activePlayer = PLAYER_NAMES.includes(data.activePlayer)
+                        ? data.activePlayer
+                        : PLAYER_NAMES[0];
+
+                    playersState = data.playersState;
+                    availableBlades = data.availableBlades;
+                    availableRatchets = data.availableRatchets;
+                    availableBits = data.availableBits;
+
+                    currentSelection = data.currentSelection || {
+                        blade: null,
+                        ratchet: null,
+                        bit: null
+                    };
+
+                    holds = data.holds || {
+                        blade: false,
+                        ratchet: false,
+                        bit: false
+                    };
+
+                    tournamentState = data.tournamentState || null;
+
+                    setupPlayerSelectDropdown();
+                    updateHoldUI();
+                    renderAll();
+                    renderLeague();
+                    saveDraftState();
+
+                    alert('Draft e campionato importati correttamente!');
+                } catch (error) {
+                    console.error('Errore importazione JSON:', error);
+                    alert('Importazione non riuscita: ' + error.message);
+                }
+            };
+
+            reader.onerror = function () {
+                alert('Impossibile leggere il file selezionato.');
+            };
+
+            reader.readAsText(file);
+        }
+
+        
+
+        // --- EVENT LISTENERS ---
+        document.getElementById('export-json-btn').addEventListener('click', exportDraftJSON);
+        document.getElementById('spin-btn').addEventListener('click', () => rollReels(false));
+        document.getElementById('build-btn').addEventListener('click', buildAndAssignBey);
+        
+        document.getElementById('lock-all-btn').addEventListener('click', () => {
+            holds = { blade: true, ratchet: true, bit: true };
+            updateHoldUI();
+        });
+
+        document.getElementById('unlock-all-btn').addEventListener('click', () => {
+            holds = { blade: false, ratchet: false, bit: false };
+            updateHoldUI();
+        });
+
+        document.getElementById('reset-draft-btn').addEventListener('click', () => {
+            if (confirm(
+                "Sei sicuro di voler resettare il draft di tutti gli 8 giocatori " +
+                "e cancellare anche il calendario, i risultati e la classifica del campionato?"
+            )) {
+                initApp();
+
+                // Resetta anche l'interfaccia del campionato
+                tournamentState = null;
+                leagueOpenRounds = new Set([1]);
+
+                renderAll();
+                renderLeague();
+                saveDraftState();
+            }
+        });
+
+        document.getElementById("import-json-btn").addEventListener("click", () => {
+            document.getElementById("import-json-file").click();
+        });
+
+        document.getElementById("import-json-file").addEventListener("change", function () {
+            const file = this.files[0];
+
+            if (file) {
+                if (confirm(
+                    "Importare questo file? " +
+                    "Il draft attuale verrà sostituito."
+                )) {
+                    importDraftJSON(file);
+                }
+
+                // Consente di selezionare nuovamente lo stesso file
+                this.value = "";
+            }
+        });
+
+        document.getElementById('generate-league-btn').addEventListener('click', generateLeague);
+
+        document.getElementById('export-league-json-btn').addEventListener('click', exportLeagueJSON);
+
+        document.getElementById('import-league-json-btn').addEventListener('click', () => {
+            document.getElementById('import-league-json-file').click();
+        });
+
+        document.getElementById('import-league-json-file').addEventListener('change', event => {
+            const file = event.target.files[0];
+
+            if (file) {
+                importLeagueJSON(file);
+            }
+
+            // Permette di selezionare di nuovo lo stesso file.
+            event.target.value = '';
+        });
+
+        // Initialize App on load
+        window.onload = loadApp;
+    </script>
+</body>
+</html>
