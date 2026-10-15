@@ -150,6 +150,86 @@
             </button>
         </div>
     </div>
+	
+	<!-- MODALE DETTAGLI BEYBLADE -->
+	<div id="bey-detail-modal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+		<div class="bg-gray-900 border-2 border-cyan-500/60 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative neon-glow-cyan transform transition-all duration-200">
+			
+			<!-- Intestazione Modal -->
+			<div class="flex justify-between items-center mb-4 border-b border-gray-800 pb-3">
+				<div>
+					<h3 id="modal-bey-owner" class="text-xs font-bold text-cyan-400 uppercase tracking-widest font-orbitron">
+						Beyblade di Player
+					</h3>
+					<h2 id="modal-bey-title" class="text-xl font-black font-orbitron text-white">
+						Nome Beyblade
+					</h2>
+				</div>
+				<button id="close-detail-modal-btn" class="text-gray-400 hover:text-white text-2xl font-bold font-orbitron">
+					✕
+				</button>
+			</div>
+
+			<!-- Riepilogo Statistiche Totali -->
+			<div class="bg-gray-950 p-3 rounded-xl border border-gray-800 mb-4 grid grid-cols-4 gap-2 text-center">
+				<div>
+					<span class="text-[10px] text-gray-400 uppercase block font-semibold">Peso Tot.</span>
+					<span id="modal-bey-weight" class="text-sm font-bold font-orbitron text-cyan-400">0.0g</span>
+				</div>
+				<div>
+					<span class="text-[10px] text-gray-400 uppercase block font-semibold">Attacco</span>
+					<span id="modal-bey-atk" class="text-sm font-bold font-orbitron text-red-400">0</span>
+				</div>
+				<div>
+					<span class="text-[10px] text-gray-400 uppercase block font-semibold">Difesa</span>
+					<span id="modal-bey-def" class="text-sm font-bold font-orbitron text-blue-400">0</span>
+				</div>
+				<div>
+					<span class="text-[10px] text-gray-400 uppercase block font-semibold">Stamina</span>
+					<span id="modal-bey-sta" class="text-sm font-bold font-orbitron text-emerald-400">0</span>
+				</div>
+			</div>
+
+			<!-- Dettaglio Componenti -->
+			<div class="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+				
+				<!-- BLADE -->
+				<div class="bg-gray-950/80 border border-cyan-500/30 rounded-xl p-3 flex items-center gap-3">
+					<div id="modal-blade-img" class="w-14 h-14 flex-shrink-0"></div>
+					<div class="flex-1">
+						<span class="text-[10px] text-cyan-400 font-bold font-orbitron uppercase block">Lama (Blade)</span>
+						<div id="modal-blade-name" class="font-bold text-white text-sm">---</div>
+						<div id="modal-blade-stats" class="text-xs text-gray-400 mt-0.5">---</div>
+					</div>
+				</div>
+
+				<!-- RATCHET -->
+				<div class="bg-gray-950/80 border border-fuchsia-500/30 rounded-xl p-3 flex items-center gap-3">
+					<div id="modal-ratchet-img" class="w-14 h-14 flex-shrink-0"></div>
+					<div class="flex-1">
+						<span class="text-[10px] text-fuchsia-400 font-bold font-orbitron uppercase block">Ratchet</span>
+						<div id="modal-ratchet-name" class="font-bold text-white text-sm">---</div>
+						<div id="modal-ratchet-stats" class="text-xs text-gray-400 mt-0.5">---</div>
+					</div>
+				</div>
+
+				<!-- BIT -->
+				<div class="bg-gray-950/80 border border-amber-500/30 rounded-xl p-3 flex items-center gap-3">
+					<div id="modal-bit-img" class="w-14 h-14 flex-shrink-0"></div>
+					<div class="flex-1">
+						<span class="text-[10px] text-amber-400 font-bold font-orbitron uppercase block">Punta (Bit)</span>
+						<div id="modal-bit-name" class="font-bold text-white text-sm">---</div>
+						<div id="modal-bit-stats" class="text-xs text-gray-400 mt-0.5">---</div>
+					</div>
+				</div>
+
+			</div>
+
+			<button id="close-detail-modal-bottom-btn" class="w-full mt-5 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-200 font-bold font-orbitron text-xs rounded-xl border border-gray-700 transition uppercase tracking-wider cursor-pointer">
+				Chiudi
+			</button>
+		</div>
+	</div>
 
     <!-- HEADER -->
     <header class="max-w-7xl w-full mx-auto mb-6 flex flex-col md:flex-row justify-between items-center bg-gray-900/80 backdrop-blur-md border border-cyan-500/30 p-4 rounded-2xl shadow-2xl gap-4">
@@ -194,7 +274,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.033 8.033 0 01-15.357-2m15.357 2H15"/>
                 </svg>
-                Reset Draft
+                Reset
             </button>
         </div>
     </header>
@@ -261,7 +341,7 @@
                         </div>
 
                         <button id="hold-blade-btn" onclick="toggleHold('blade')" class="w-full py-2 bg-gray-800 hover:bg-cyan-600/30 text-cyan-400 border border-cyan-500/40 rounded-lg text-xs font-bold font-orbitron tracking-wider transition flex items-center justify-center gap-1.5">
-                            <span id="hold-icon-blade">🔓</span> HOLD
+                            <span id="hold-icon-blade">🔓</span> BLOCCA
                         </button>
                     </div>
 
@@ -279,7 +359,7 @@
                         </div>
 
                         <button id="hold-ratchet-btn" onclick="toggleHold('ratchet')" class="w-full py-2 bg-gray-800 hover:bg-fuchsia-600/30 text-fuchsia-400 border border-fuchsia-500/40 rounded-lg text-xs font-bold font-orbitron tracking-wider transition flex items-center justify-center gap-1.5">
-                            <span id="hold-icon-ratchet">🔓</span> HOLD
+                            <span id="hold-icon-ratchet">🔓</span> BLOCCA
                         </button>
                     </div>
 
@@ -297,7 +377,7 @@
                         </div>
 
                         <button id="hold-bit-btn" onclick="toggleHold('bit')" class="w-full py-2 bg-gray-800 hover:bg-amber-600/30 text-amber-400 border border-amber-500/40 rounded-lg text-xs font-bold font-orbitron tracking-wider transition flex items-center justify-center gap-1.5">
-                            <span id="hold-icon-bit">🔓</span> HOLD
+                            <span id="hold-icon-bit">🔓</span> BLOCCA
                         </button>
                     </div>
 
@@ -786,28 +866,31 @@
             document.getElementById('league-subtitle').textContent = `Round Robin (${modeText}) • ${count} giocatori`;
         }
 
-        function initAppWithNames() {
-            availableBlades = JSON.parse(JSON.stringify(ORIGINAL_BLADES));
-            availableRatchets = JSON.parse(JSON.stringify(ORIGINAL_RATCHETS));
-            availableBits = JSON.parse(JSON.stringify(ORIGINAL_BITS));
+		function initAppWithNames() {
+			availableBlades = JSON.parse(JSON.stringify(ORIGINAL_BLADES));
+			availableRatchets = JSON.parse(JSON.stringify(ORIGINAL_RATCHETS));
+			availableBits = JSON.parse(JSON.stringify(ORIGINAL_BITS));
 
-            playersState = {};
-            PLAYER_NAMES.forEach(name => {
-                playersState[name] = { name: name, beys: [] };
-            });
+			playersState = {};
+			PLAYER_NAMES.forEach(name => {
+				playersState[name] = { name: name, beys: [] };
+			});
 
-            activePlayer = PLAYER_NAMES[0];
-            holds = { blade: false, ratchet: false, bit: false };
-            tournamentState = null;
+			activePlayer = PLAYER_NAMES[0];
+			holds = { blade: false, ratchet: false, bit: false };
+			
+			// Imposta la selezione iniziale su valore non definito (default)
+			currentSelection = { blade: null, ratchet: null, bit: null };
+			tournamentState = null;
 
-            updateHeadersAndSubtitles();
-            setupPlayerSelectDropdown();
-            updateHoldUI();
-            rollReels(true);
-            renderAll();
-            renderLeague();
-            saveDraftState();
-        }
+			updateHeadersAndSubtitles();
+			setupPlayerSelectDropdown();
+			updateHoldUI();
+			
+			renderAll();
+			renderLeague();
+			saveDraftState();
+		}
 
         // --- SVG ICON GENERATOR ---
         function getSvgIcon(type, color = "#00f0ff") {
@@ -987,38 +1070,62 @@
             }, 80);
         }
 
-        function updateReelDisplays() {
-            if (currentSelection.blade) {
-                document.getElementById('blade-title').textContent = currentSelection.blade.name + ' (' + currentSelection.blade.type + ')';
-                document.getElementById('blade-weight').textContent = `${currentSelection.blade.weight.toFixed(1)}g - Spin ${currentSelection.blade.spin} - Rank ${currentSelection.blade.rank}`;
-                const bladeImage = document.getElementById('blade-svg-container');
-                bladeImage.innerHTML = currentSelection.blade.image
-                    ? `<img src="${currentSelection.blade.image}" alt="${currentSelection.blade.name}" class="w-full h-full object-contain">`
-                    : getSvgIcon('blade', currentSelection.blade.color);
-            }
+		function updateReelDisplays() {
+			// --- LAMA ---
+			const bladeTitle = document.getElementById('blade-title');
+			const bladeWeight = document.getElementById('blade-weight');
+			const bladeImage = document.getElementById('blade-svg-container');
 
-            if (currentSelection.ratchet) {
-                document.getElementById('ratchet-title').textContent = currentSelection.ratchet.name;
-                document.getElementById('ratchet-weight').textContent = `${currentSelection.ratchet.weight.toFixed(1)}g - Rank ${currentSelection.ratchet.rank}`;
-                const ratchetImage = document.getElementById('ratchet-svg-container');
-                ratchetImage.innerHTML = currentSelection.ratchet.image
-                    ? `<img src="${currentSelection.ratchet.image}" alt="${currentSelection.ratchet.name}" class="w-full h-full object-contain">`
-                    : getSvgIcon('ratchet', currentSelection.ratchet.color);
-            }
+			if (currentSelection.blade) {
+				bladeTitle.textContent = currentSelection.blade.name + ' (' + currentSelection.blade.type + ')';
+				bladeWeight.textContent = `${currentSelection.blade.weight.toFixed(1)}g - Spin ${currentSelection.blade.spin} - Rank ${currentSelection.blade.rank}`;
+				bladeImage.innerHTML = currentSelection.blade.image
+					? `<img src="${currentSelection.blade.image}" alt="${currentSelection.blade.name}" class="w-full h-full object-contain">`
+					: getSvgIcon('blade', currentSelection.blade.color);
+			} else {
+				bladeTitle.textContent = "---";
+				bladeWeight.textContent = "0.0g";
+				bladeImage.innerHTML = getSvgIcon('blade', '#374151');
+			}
 
-            if (currentSelection.bit) {
-                document.getElementById('bit-title').textContent = currentSelection.bit.name + ' (' + currentSelection.bit.type + ')';
-                document.getElementById('bit-weight').textContent = `${currentSelection.bit.weight.toFixed(1)}g - Rank ${currentSelection.bit.rank}`;
-                const bitImage = document.getElementById('bit-svg-container');
-                bitImage.innerHTML = currentSelection.bit.image
-                    ? `<img src="${currentSelection.bit.image}" alt="${currentSelection.bit.name}" class="w-full h-full object-contain">`
-                    : getSvgIcon('bit', currentSelection.bit.color);
-            }
+			// --- RATCHET ---
+			const ratchetTitle = document.getElementById('ratchet-title');
+			const ratchetWeight = document.getElementById('ratchet-weight');
+			const ratchetImage = document.getElementById('ratchet-svg-container');
 
-            document.getElementById('count-blade').textContent = `${availableBlades.length} Rimanenti`;
-            document.getElementById('count-ratchet').textContent = `${availableRatchets.length} Rimanenti`;
-            document.getElementById('count-bit').textContent = `${availableBits.length} Rimanenti`;
-        }
+			if (currentSelection.ratchet) {
+				ratchetTitle.textContent = currentSelection.ratchet.name;
+				ratchetWeight.textContent = `${currentSelection.ratchet.weight.toFixed(1)}g - Rank ${currentSelection.ratchet.rank}`;
+				ratchetImage.innerHTML = currentSelection.ratchet.image
+					? `<img src="${currentSelection.ratchet.image}" alt="${currentSelection.ratchet.name}" class="w-full h-full object-contain">`
+					: getSvgIcon('ratchet', currentSelection.ratchet.color);
+			} else {
+				ratchetTitle.textContent = "---";
+				ratchetWeight.textContent = "0.0g";
+				ratchetImage.innerHTML = getSvgIcon('ratchet', '#374151');
+			}
+
+			// --- PUNTA ---
+			const bitTitle = document.getElementById('bit-title');
+			const bitWeight = document.getElementById('bit-weight');
+			const bitImage = document.getElementById('bit-svg-container');
+
+			if (currentSelection.bit) {
+				bitTitle.textContent = currentSelection.bit.name + ' (' + currentSelection.bit.type + ')';
+				bitWeight.textContent = `${currentSelection.bit.weight.toFixed(1)}g - Rank ${currentSelection.bit.rank}`;
+				bitImage.innerHTML = currentSelection.bit.image
+					? `<img src="${currentSelection.bit.image}" alt="${currentSelection.bit.name}" class="w-full h-full object-contain">`
+					: getSvgIcon('bit', currentSelection.bit.color);
+			} else {
+				bitTitle.textContent = "---";
+				bitWeight.textContent = "0.0g";
+				bitImage.innerHTML = getSvgIcon('bit', '#374151');
+			}
+
+			document.getElementById('count-blade').textContent = `${availableBlades.length} Rimanenti`;
+			document.getElementById('count-ratchet').textContent = `${availableRatchets.length} Rimanenti`;
+			document.getElementById('count-bit').textContent = `${availableBits.length} Rimanenti`;
+		}
 
         function updateStatsPreview() {
             const b = currentSelection.blade || { atk:0, def:0, sta:0, weight:0 };
@@ -1041,73 +1148,88 @@
             document.getElementById('total-weight-badge').textContent = `Peso Totale: ${totalWeight}g`;
         }
 
-        async function buildAndAssignBey() {
-            const player = playersState[activePlayer];
-            
-            if (!player) return;
+		async function buildAndAssignBey() {
+			const player = playersState[activePlayer];
+			
+			if (!player) return;
 
-            if (player.beys.length >= 3) {
-                await showAlert(`Il giocatore ${activePlayer} ha già 3 Beyblade! Seleziona un altro giocatore.`);
-                return;
-            }
+			if (player.beys.length >= 3) {
+				await showAlert(`Il giocatore ${activePlayer} ha già 3 Beyblade! Seleziona un altro giocatore.`);
+				return;
+			}
 
-            if (!currentSelection.blade || !currentSelection.ratchet || !currentSelection.bit) {
-                await showAlert("Errore nella selezione dei componenti.");
-                return;
-            }
+			// Controlla se la selezione attuale è valida e non è stata già resettata
+			if (!currentSelection.blade || !currentSelection.ratchet || !currentSelection.bit) {
+				await showAlert("Devi fare prima il ROLL! per generare una combinazione di componenti.");
+				return;
+			}
 
-            const beyCombo = {
-                id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
-                blade: { ...currentSelection.blade },
-                ratchet: { ...currentSelection.ratchet },
-                bit: { ...currentSelection.bit },
-                totalWeight: parseFloat((currentSelection.blade.weight + currentSelection.ratchet.weight + currentSelection.bit.weight).toFixed(1)),
-                totalAtk: currentSelection.blade.atk + currentSelection.ratchet.atk + currentSelection.bit.atk,
-                totalDef: currentSelection.blade.def + currentSelection.ratchet.def + currentSelection.bit.def,
-                totalSta: currentSelection.blade.sta + currentSelection.ratchet.sta + currentSelection.bit.sta
-            };
+			const beyCombo = {
+				id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+				blade: { ...currentSelection.blade },
+				ratchet: { ...currentSelection.ratchet },
+				bit: { ...currentSelection.bit },
+				totalWeight: parseFloat((currentSelection.blade.weight + currentSelection.ratchet.weight + currentSelection.bit.weight).toFixed(1)),
+				totalAtk: currentSelection.blade.atk + currentSelection.ratchet.atk + currentSelection.bit.atk,
+				totalDef: currentSelection.blade.def + currentSelection.ratchet.def + currentSelection.bit.def,
+				totalSta: currentSelection.blade.sta + currentSelection.ratchet.sta + currentSelection.bit.sta
+			};
 
-            availableBlades = availableBlades.filter(x => x.id !== currentSelection.blade.id);
-            availableRatchets = availableRatchets.filter(x => x.id !== currentSelection.ratchet.id);
-            availableBits = availableBits.filter(x => x.id !== currentSelection.bit.id);
+			// Rimuove i pezzi assegnati dai pool disponibili
+			availableBlades = availableBlades.filter(x => x.id !== currentSelection.blade.id);
+			availableRatchets = availableRatchets.filter(x => x.id !== currentSelection.ratchet.id);
+			availableBits = availableBits.filter(x => x.id !== currentSelection.bit.id);
 
-            player.beys.push(beyCombo);
+			player.beys.push(beyCombo);
 
-            holds = { blade: false, ratchet: false, bit: false };
-            updateHoldUI();
+			// Sblocca eventuali HOLD
+			holds = { blade: false, ratchet: false, bit: false };
+			updateHoldUI();
 
-            rollReels(true);
+			// RESET Dello stato ad "Non Definito / Vuoto"
+			currentSelection = { blade: null, ratchet: null, bit: null };
 
-            if (player.beys.length >= 3) {
-                const nextPlayer = PLAYER_NAMES.find(n => playersState[n].beys.length < 3);
-                if (nextPlayer) {
-                    activePlayer = nextPlayer;
-                    document.getElementById('player-select').value = activePlayer;
-                }
-            }
+			// Passa al giocatore successivo se quello attuale è completo (3/3)
+			if (player.beys.length >= 3) {
+				const nextPlayer = PLAYER_NAMES.find(n => playersState[n].beys.length < 3);
+				if (nextPlayer) {
+					activePlayer = nextPlayer;
+					document.getElementById('player-select').value = activePlayer;
+				}
+			}
 
-            renderAll();
-        }
+			renderAll();
+		}
 
-        function dismantleBey(playerName, beyId) {
-            const player = playersState[playerName];
-            if (!player) return;
+		async function dismantleBey(playerName, beyId) {
+			const player = playersState[playerName];
+			if (!player) return;
 
-            const beyIndex = player.beys.findIndex(b => b.id === beyId);
-            if (beyIndex === -1) return;
+			const beyIndex = player.beys.findIndex(b => b.id === beyId);
+			if (beyIndex === -1) return;
 
-            const [removedBey] = player.beys.splice(beyIndex, 1);
+			const beyName = `${player.beys[beyIndex].blade.name} - ${player.beys[beyIndex].ratchet.name} - ${player.beys[beyIndex].bit.name}`;
 
-            availableBlades.push(removedBey.blade);
-            availableRatchets.push(removedBey.ratchet);
-            availableBits.push(removedBey.bit);
+			// Chiedi conferma tramite la modale personalizzata
+			const confirmed = await showConfirm(
+				`Sei sicuro di voler eliminare il Beyblade "${beyName}" di ${playerName}? I componenti torneranno disponibili nel pool.`,
+				"CONFERMA ELIMINAZIONE"
+			);
 
-            availableBlades.sort((a,b) => a.name.localeCompare(b.name));
-            availableRatchets.sort((a,b) => a.name.localeCompare(b.name));
-            availableBits.sort((a,b) => a.name.localeCompare(b.name));
+			if (!confirmed) return;
 
-            renderAll();
-        }
+			const [removedBey] = player.beys.splice(beyIndex, 1);
+
+			availableBlades.push(removedBey.blade);
+			availableRatchets.push(removedBey.ratchet);
+			availableBits.push(removedBey.bit);
+
+			availableBlades.sort((a, b) => a.name.localeCompare(b.name));
+			availableRatchets.sort((a, b) => a.name.localeCompare(b.name));
+			availableBits.sort((a, b) => a.name.localeCompare(b.name));
+
+			renderAll();
+}
 
         function renderAll() {
             updateActivePlayerBadge();
@@ -1135,40 +1257,40 @@
 
                 let beysListHtml = '';
 
-                if (player.beys.length === 0) {
-                    beysListHtml = `<p class="text-xs text-gray-500 italic py-2 text-center">Nessun Beyblade assegnato</p>`;
-                } else {
-                    beysListHtml = player.beys.map(bey => `
-                        <div class="bg-gray-900/90 rounded-lg p-2.5 border border-gray-800 flex items-center justify-between gap-2 mt-2">
-                            <div class="flex items-center gap-2">
-                                <div class="w-12 h-12 flex-shrink-0">
-                                    ${
-                                        bey.blade.image
-                                            ? `<img src="${bey.blade.image}" alt="${bey.blade.name}" class="w-full h-full object-contain">`
-                                            : getSvgIcon('blade', bey.blade.color)
-                                    }
-                                </div>
-                                <div>
-                                    <div class="text-[12px] font-bold font-orbitron text-white">
-                                        ${bey.blade.name} (${bey.blade.type}) - Rank ${bey.blade.rank}<br>
-                                        <span class="text-cyan-400">${bey.ratchet.name} - Rank ${bey.ratchet.rank}</span><br>
-                                        <span class="text-amber-400">${bey.bit.name} (${bey.bit.type}) - Rank ${bey.bit.rank}</span>
-                                    </div>
-                                    <div class="text-[14px] text-gray-400 flex gap-2 font-semibold">
-                                        <span>⚖️ ${bey.totalWeight}g</span>
-                                        <span class="text-red-400">⚔️ ${bey.totalAtk}</span>
-                                        <span class="text-blue-400">🛡️ ${bey.totalDef}</span>
-                                        <span class="text-emerald-400">🌀 ${bey.totalSta}</span>
-                                    </div>
-                                </div>
-                            </div>
+				if (player.beys.length === 0) {
+					beysListHtml = `<p class="text-xs text-gray-500 italic py-2 text-center">Nessun Beyblade assegnato</p>`;
+				} else {
+					beysListHtml = player.beys.map(bey => `
+						<div onclick="showBeyDetailModal('${name}', '${bey.id}')" class="bg-gray-900/90 hover:bg-gray-800/80 cursor-pointer rounded-lg p-2.5 border border-gray-800 hover:border-cyan-500/50 transition-all flex items-center justify-between gap-2 mt-2 group">
+							<div class="flex items-center gap-2">
+								<div class="w-12 h-12 flex-shrink-0">
+									${
+										bey.blade.image
+											? `<img src="${bey.blade.image}" alt="${bey.blade.name}" class="w-full h-full object-contain">`
+											: getSvgIcon('blade', bey.blade.color)
+									}
+								</div>
+								<div>
+									<div class="text-[12px] font-bold font-orbitron text-white group-hover:text-cyan-300 transition-colors">
+										${bey.blade.name} (${bey.blade.type}) - Rank ${bey.blade.rank}<br>
+										<span class="text-cyan-400">${bey.ratchet.name} - Rank ${bey.ratchet.rank}</span><br>
+										<span class="text-amber-400">${bey.bit.name} (${bey.bit.type}) - Rank ${bey.bit.rank}</span>
+									</div>
+									<div class="text-[14px] text-gray-400 flex gap-2 font-semibold">
+										<span>⚖️ ${bey.totalWeight}g</span>
+										<span class="text-red-400">⚔️ ${bey.totalAtk}</span>
+										<span class="text-blue-400">🛡️ ${bey.totalDef}</span>
+										<span class="text-emerald-400">🌀 ${bey.totalSta}</span>
+									</div>
+								</div>
+							</div>
 
-                            <button onclick="dismantleBey('${name}', '${bey.id}')" class="text-[10px] bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-1 rounded transition flex-shrink-0" title="Smonta combo">
-                                ✖
-                            </button>
-                        </div>
-                    `).join('');
-                }
+							<button onclick="event.stopPropagation(); dismantleBey('${name}', '${bey.id}')" class="text-[10px] bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-1 rounded transition flex-shrink-0" title="Smonta combo">
+								✖
+							</button>
+						</div>
+					`).join('');
+				}
 
                 playerCard.innerHTML = `
                     <div class="flex justify-between items-center cursor-pointer" onclick="setActivePlayer('${name}')">
@@ -1319,12 +1441,12 @@
                         if (result.scoreA > result.scoreB) {
                             a.wins++;
                             b.losses++;
-                            a.points += 3;
                         } else if (result.scoreB > result.scoreA) {
                             b.wins++;
                             a.losses++;
-                            b.points += 3;
                         }
+						a.points += result.scoreA;
+						b.points += result.scoreB;
                     }
                 }
             }
@@ -1673,6 +1795,60 @@
                 event.target.value = '';
             }
         });
+		
+		// --- FUNZIONE PER MOSTRARE I DETTAGLI DEL BEYBLADE ---
+		function showBeyDetailModal(playerName, beyId) {
+			const player = playersState[playerName];
+			if (!player) return;
+
+			const bey = player.beys.find(b => b.id === beyId);
+			if (!bey) return;
+
+			// Intestazione
+			document.getElementById('modal-bey-owner').textContent = `Beyblade di ${playerName}`;
+			document.getElementById('modal-bey-title').textContent = `${bey.blade.name} ${bey.ratchet.name} ${bey.bit.name}`;
+
+			// Totali
+			document.getElementById('modal-bey-weight').textContent = `${bey.totalWeight.toFixed(1)}g`;
+			document.getElementById('modal-bey-atk').textContent = bey.totalAtk;
+			document.getElementById('modal-bey-def').textContent = bey.totalDef;
+			document.getElementById('modal-bey-sta').textContent = bey.totalSta;
+
+			// Blade
+			document.getElementById('modal-blade-name').textContent = `${bey.blade.name} (${bey.blade.type})`;
+			document.getElementById('modal-blade-stats').textContent = `${bey.blade.weight}g | Spin: ${bey.blade.spin} | ATK: ${bey.blade.atk} DEF: ${bey.blade.def} STA: ${bey.blade.sta} | Rank: ${bey.blade.rank}`;
+			document.getElementById('modal-blade-img').innerHTML = bey.blade.image
+				? `<img src="${bey.blade.image}" alt="${bey.blade.name}" class="w-full h-full object-contain">`
+				: getSvgIcon('blade', bey.blade.color);
+
+			// Ratchet
+			document.getElementById('modal-ratchet-name').textContent = bey.ratchet.name;
+			document.getElementById('modal-ratchet-stats').textContent = `${bey.ratchet.weight}g | ATK: ${bey.ratchet.atk} DEF: ${bey.ratchet.def} STA: ${bey.ratchet.sta} | Rank: ${bey.ratchet.rank}`;
+			document.getElementById('modal-ratchet-img').innerHTML = bey.ratchet.image
+				? `<img src="${bey.ratchet.image}" alt="${bey.ratchet.name}" class="w-full h-full object-contain">`
+				: getSvgIcon('ratchet', bey.ratchet.color);
+
+			// Bit
+			document.getElementById('modal-bit-name').textContent = `${bey.bit.name} (${bey.bit.type})`;
+			document.getElementById('modal-bit-stats').textContent = `${bey.bit.weight}g | ATK: ${bey.bit.atk} DEF: ${bey.bit.def} STA: ${bey.bit.sta} | Rank: ${bey.bit.rank}`;
+			document.getElementById('modal-bit-img').innerHTML = bey.bit.image
+				? `<img src="${bey.bit.image}" alt="${bey.bit.name}" class="w-full h-full object-contain">`
+				: getSvgIcon('bit', bey.bit.color);
+
+			// Apri modale
+			document.getElementById('bey-detail-modal').classList.remove('hidden');
+		}
+
+		function closeBeyDetailModal() {
+			document.getElementById('bey-detail-modal').classList.add('hidden');
+		}
+
+		// Event Listeners Chiusura Modale
+		document.getElementById('close-detail-modal-btn').addEventListener('click', closeBeyDetailModal);
+		document.getElementById('close-detail-modal-bottom-btn').addEventListener('click', closeBeyDetailModal);
+		document.getElementById('bey-detail-modal').addEventListener('click', (e) => {
+			if (e.target.id === 'bey-detail-modal') closeBeyDetailModal();
+		});
 
         // Avvio applicazione
         window.onload = loadApp;
